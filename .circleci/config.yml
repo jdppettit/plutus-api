@@ -1,0 +1,131 @@
+version: 2.1
+
+defaults: &defaults
+  docker:
+    - image: circleci/elixir:1.6-otp-21-node-browsers-legacy
+  environment:
+    REGISTRY: 'registry.pettitservers.com:5000/plutus'
+    MIX_ENV: 'test'
+
+login: &login
+  run:
+    name: docker_login
+    command: |
+      docker login -u $PRIVATE_REGISTRY_USERNAME -p $PRIVATE_REGISTRY_PASSWORD registry.pettitservers.com:5000
+
+jobs:
+  test:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.6-otp-21-node-browsers-legacy
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: plutus
+          POSTGRES_DB: plutus_test
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run: mix local.hex --force
+
+      - run: mix local.rebar --force
+
+      - restore_cache:
+          keys: 
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+
+      - run: mix do deps.get, compile
+
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: "deps"
+
+      - save_cache:
+          key: v1-build-cache-{{ .Branch }}
+          paths: "_build"
+
+      - run:
+          name: db setup
+          command: |
+            mix ecto.create && mix ecto.migrate
+
+      - run:
+          name: run tests
+          command: |
+            mix test
+
+      - store_test_results: 
+          path: _build/test/lib/plutus
+
+
+  build_and_deploy:
+    <<: *defaults
+    docker:
+      - image: jpettit/circleci-image-statusy:latest
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - <<: *login
+
+      - run:
+          name: build
+          command: |
+            git clean -x -f -d
+            docker build -t $REGISTRY/plutus-app .
+
+      - run:
+          name: push
+          command: |
+            docker tag $REGISTRY/plutus-app $REGISTRY/plutus-app:$CIRCLE_SHA1
+            docker push $REGISTRY/plutus-app:$CIRCLE_SHA1
+
+      - run:
+          name: pull_staging
+          command: |
+            docker pull $REGISTRY/plutus-app:$CIRCLE_SHA1
+
+      - run:
+          name: tag_and_push_latest
+          command: |
+            # tag
+            docker tag $REGISTRY/plutus-app:$CIRCLE_SHA1 $REGISTRY/plutus-app:latest
+
+            # push
+            docker push $REGISTRY/plutus-app:latest
+
+      - run:
+          name: deploy-kubernetes
+          command: |
+            pwd
+            docker login -u $PRIVATE_REGISTRY_USERNAME -p $PRIVATE_REGISTRY_PASSWORD registry.pettitservers.com:5000
+            install -Dm644 ./chart/config ~/.kube/config
+            install -Dm644 ./chart/circle_plutus_k8s.crt ~/.kube/circle_plutus_k8s.crt
+            install -Dm644 ./chart/circle_plutus_k8s.key ~/.kube/circle_plutus_k8s.key
+
+            cat \<< EOF > override.yaml
+            imageTag: $CIRCLE_SHA1
+            EOF
+
+            helm upgrade plutus-master --install --force --values=./override.yaml --namespace=plutus ./chart
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - test
+      - build_and_deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
