@@ -1,4 +1,4 @@
-defmodule plutus.Mixfile do
+defmodule Plutus.Mixfile do
   use Mix.Project
 
   def project do
@@ -17,7 +17,7 @@ end
   def application do
     [
       extra_applications: [:logger, :runtime_tools],
-      mod: {plutus.Application, []}
+      mod: {Plutus.Application, []}
     ]
   end
 
@@ -41,7 +41,9 @@ end
       {:junit_formatter, "~> 3.1", only: [:test]},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:plaid, "~> 2.0", hex: :plaid_elixir},
+      {:poison, "~> 4.0", override: true}
     ]
   end
 
