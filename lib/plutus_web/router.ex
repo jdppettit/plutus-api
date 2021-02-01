@@ -12,15 +12,11 @@ defmodule PlutusWeb.Router do
   scope "/api/v1", PlutusWeb do
     pipe_through(:api)
 
-    scope "/income", PlutusWeb do
-      post "/", IncomeController, :create
-      get "/", IncomeController, :get_all
-      get "/:id", IncomeController, :get
-    end
+    post "/income", IncomeController, :create
+    get "/income", IncomeController, :get_all
+    get "/income/:id", IncomeController, :get
 
-    scope "/account", PlutusWeb do
-
-    end
+    get "/account/linktoken", AccountController, :link_token
 
     scope "/expense", PlutusWeb do
 

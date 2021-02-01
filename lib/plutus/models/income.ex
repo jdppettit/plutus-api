@@ -2,7 +2,7 @@ defmodule Plutus.Model.Income do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  require Loggers
+  require Logger
 
   schema "income" do
     field :recurring, :boolean

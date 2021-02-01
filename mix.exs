@@ -3,7 +3,7 @@ defmodule Plutus.Mixfile do
 
   def project do
     [
-      app: :Plutus,
+      app: :plutus,
       version: "0.0.1",
       elixir: "~> 1.4",
       elixirc_paths: elixirc_paths(Mix.env()),

@@ -11,6 +11,9 @@ config :plutus, PlutusWeb.Endpoint,
   pubsub_server: Plutus.PubSub,
   live_view: [signing_salt: "3JJF9rau"]
 
+config :phoenix, :format_encoders,
+  json: Jason
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

@@ -2,7 +2,7 @@ defmodule Plutus.Model.Account do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  require Loggers
+  require Logger
 
   schema "account" do
     field :description, :string
