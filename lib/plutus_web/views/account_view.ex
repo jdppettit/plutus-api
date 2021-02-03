@@ -28,9 +28,23 @@ defmodule PlutusWeb.AccountView do
       message: "account get success",
       account: %{
         id: account.id,
-        public_token: account.public_token,
-        access_token: account.access_token
+        description: account.description
       }
+    }
+  end
+
+  def render("accounts.json", %{accounts: accounts}) do
+    rendered_accounts = accounts
+    |> Enum.map(fn account -> 
+      %{
+        id: account.id,
+        description: account.description
+      }
+    end)
+
+    %{
+      message: "accounts get success",
+      accounts: rendered_accounts
     }
   end
 end

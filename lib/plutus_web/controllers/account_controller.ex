@@ -77,4 +77,20 @@ defmodule PlutusWeb.AccountController do
         |> render("bad_request.json", message: "database error")      
     end 
   end
+
+  def get_all(conn, _params) do
+    with {:ok, models} <- Account.get_all() do
+      conn
+      |> render("accounts.json", accounts: models)
+    else 
+      {:error, :not_found} ->
+        conn
+        |> put_status(404)
+        |> render("bad_request.json", message: "not found")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")
+    end 
+  end
 end
