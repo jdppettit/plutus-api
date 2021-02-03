@@ -1,22 +1,17 @@
-defmodule Plutus.Model.Account do
+defmodule Plutus.Model.Institution do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
   require Logger
 
-  schema "account" do
+  schema "institution" do
     field :description, :string
-    field :last_four, :integer
-    field :remote_id, :string
-    field :balance, :float
     field :public_token, :string
     field :access_token, :string
-    field :last_refreshed, :date
 
     timestamps()
-    
-    belongs_to :institution, Plutus.Model.Institution
-    has_many :transactions, Plutus.Model.Transaction
+
+    has_many :accounts, Plutus.Model.Account
   end
 
   def changeset(account, attrs) do
