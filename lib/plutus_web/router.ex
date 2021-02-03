@@ -17,6 +17,8 @@ defmodule PlutusWeb.Router do
     get "/income/:id", IncomeController, :get
 
     get "/account/linktoken", AccountController, :link_token
+    post "/account", AccountController, :create
+    get "/account/:id", AccountController, :get
 
     scope "/expense", PlutusWeb do
 

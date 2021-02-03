@@ -9,6 +9,11 @@ defmodule Plutus.Model.Account do
     field :last_four, :integer
     field :remote_id, :string
     field :balance, :float
+    field :public_token, :string
+    field :access_token, :string
+    field :last_refreshed, :date
+
+    timestamps()
 
     has_many :transactions, Plutus.Model.Transaction
   end
@@ -17,8 +22,7 @@ defmodule Plutus.Model.Account do
     account
     |> cast(attrs, __schema__(:fields))
     |> validate_required([
-      :remote_id,
-      :balance
+      :public_token
     ])
   end
 
@@ -41,6 +45,37 @@ defmodule Plutus.Model.Account do
       false ->
         Logger.error("#{__MODULE__}: Changeset invalid #{inspect(changeset)}")
         {:error, :changeset_invalid}
+    end
+  end
+
+  def insert(changeset) do
+    case Plutus.Repo.insert(changeset) do
+      {:ok, model} ->
+        {:ok, model}
+
+      _ ->
+        Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
+        {:error, :database_error}
+    end
+  end
+
+  def update(changeset) do
+    case Plutus.Repo.update(changeset) do
+      {:ok, model} ->
+        {:ok, model}
+
+      {_, _} ->
+        Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
+        {:error, :database_error}
+    end
+  end
+
+  def get_by_id(id) do
+    case Plutus.Repo.get(__MODULE__, id) do
+      nil ->
+        {:error, :not_found}
+      model ->
+        {:ok, model}
     end
   end
 end
