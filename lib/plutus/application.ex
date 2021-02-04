@@ -11,9 +11,13 @@ defmodule Plutus.Application do
       # Start the Ecto repository
       supervisor(Plutus.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(PlutusWeb.Endpoint, [])
+      supervisor(PlutusWeb.Endpoint, []),
       # Start your own worker by calling: Plutus.Worker.start_link(arg1, arg2, arg3)
       # worker(Plutus.Worker, [arg1, arg2, arg3]),
+      %{
+        id: Plutus.Supervisor.PlaidSupervisor,
+        start: {Plutus.Supervisor.PlaidSupervisor, :start_link, [[]]}
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

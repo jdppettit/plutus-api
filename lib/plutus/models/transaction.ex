@@ -11,6 +11,8 @@ defmodule Plutus.Model.Transaction do
     field :date, :date
     field :remote_id, :string
 
+    timestamps()
+
     belongs_to :account, Plutus.Model.Account
   end
 
@@ -24,6 +26,7 @@ defmodule Plutus.Model.Transaction do
       :date,
       :remote_id
     ])
+    |> unique_constraint(:remote_id)
   end
 
   def create_changeset(map) do
@@ -46,5 +49,25 @@ defmodule Plutus.Model.Transaction do
         Logger.error("#{__MODULE__}: Changeset invalid #{inspect(changeset)}")
         {:error, :changeset_invalid}
     end
+  end
+
+  def insert(changeset) do
+    case Plutus.Repo.insert(changeset) do
+      {:ok, model} ->
+        {:ok, model}
+
+      _ ->
+        Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
+        {:error, :database_error}
+    end
+  end
+
+  def guess_and_create_changeset(map) do
+    case Plutus.Repo.get_by(__MODULE__, remote_id: map.remote_id) do
+      nil ->
+        __MODULE__.create_changeset(map)
+      model ->
+        __MODULE__.create_changeset(model, map)
+    end 
   end
 end

@@ -12,10 +12,10 @@ defmodule Plutus.Model.Account do
     field :public_token, :string
     field :access_token, :string
     field :last_refreshed, :date
+    field :account_name, :string
 
     timestamps()
-    
-    belongs_to :institution, Plutus.Model.Institution
+
     has_many :transactions, Plutus.Model.Transaction
   end
 
@@ -23,8 +23,10 @@ defmodule Plutus.Model.Account do
     account
     |> cast(attrs, __schema__(:fields))
     |> validate_required([
-      :public_token
+      :public_token,
+      :remote_id
     ])
+    |> unique_constraint(:remote_id)
   end
 
   def create_changeset(map) do
@@ -78,5 +80,9 @@ defmodule Plutus.Model.Account do
       model ->
         {:ok, model}
     end
+  end
+
+  def get_all_accounts() do
+    Plutus.Repo.all(__MODULE__)
   end
 end
