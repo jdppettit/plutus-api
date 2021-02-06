@@ -11,6 +11,9 @@ defmodule Plutus.Model.Income do
     field :amount, :float
     field :description, :string
 
+    timestamps()
+
+    belongs_to :account, Plutus.Model.Account
     has_many :expenses, Plutus.Model.Expense
   end
 

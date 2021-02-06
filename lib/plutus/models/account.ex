@@ -17,6 +17,7 @@ defmodule Plutus.Model.Account do
     timestamps()
 
     has_many :transactions, Plutus.Model.Transaction
+    has_many :incomes, Plutus.Model.Income
   end
 
   def changeset(account, attrs) do

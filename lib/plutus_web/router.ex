@@ -5,28 +5,19 @@ defmodule PlutusWeb.Router do
     plug(:accepts, ["json"])
   end
 
-  pipeline :api_auth do
-    plug(:accepts, ["json"])
-  end
-
   scope "/api/v1", PlutusWeb do
     pipe_through(:api)
 
-    post "/income", IncomeController, :create
-    get "/income", IncomeController, :get_all
-    get "/income/:id", IncomeController, :get
+    post "/account/:account_id/income", IncomeController, :create
+    get "/account/:account_id/income", IncomeController, :get_all
+    get "/account/:account_id/income/:id", IncomeController, :get
 
     get "/account/linktoken", AccountController, :link_token
     post "/account", AccountController, :create
     get "/account/:id", AccountController, :get
     get "/account", AccountController, :get_all
 
-    scope "/expense", PlutusWeb do
-
-    end
-
-    scope "/transaction", PlutusWeb do
-
-    end
+    get "/account/:account_id/transaction", TransactionController, :get_all
+    get "/account/:account_id/transaction/:id", TransactionController, :get
   end
 end
