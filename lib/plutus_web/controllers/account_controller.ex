@@ -79,7 +79,7 @@ defmodule PlutusWeb.AccountController do
   end
 
   def get_all(conn, _params) do
-    with {:ok, models} <- Account.get_all() do
+    with models <- Account.get_all_accounts() do
       conn
       |> render("accounts.json", accounts: models)
     else 
