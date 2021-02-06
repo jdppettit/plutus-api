@@ -1,4 +1,4 @@
-defmodule PlutusWeb.Params.TransactionId
+defmodule PlutusWeb.Params.TransactionId do
   use Ecto.Type
   
   alias Plutus.Models.Transaction

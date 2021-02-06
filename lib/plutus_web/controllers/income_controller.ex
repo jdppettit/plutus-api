@@ -40,7 +40,7 @@ defmodule PlutusWeb.IncomeController do
   defparams(
     get_all_params(%{
       account_id!: AccountId,
-      id!: TransactionId
+      id!: IncomeId
     })
   )
 

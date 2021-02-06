@@ -1,4 +1,4 @@
-defmodule PlutusWeb.Params.IncomeId
+defmodule PlutusWeb.Params.IncomeId do
   use Ecto.Type
   
   alias Plutus.Models.Income

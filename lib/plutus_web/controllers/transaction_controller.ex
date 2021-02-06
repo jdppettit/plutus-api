@@ -12,7 +12,7 @@ defmodule PlutusWeb.TransactionController do
   )
 
   def get_all(conn, raw_params) do
-
+    conn
   end
 
   defparams(
@@ -23,6 +23,6 @@ defmodule PlutusWeb.TransactionController do
   )
 
   def get(conn, raw_params) do
-
+    conn
   end
 end 

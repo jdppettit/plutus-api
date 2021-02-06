@@ -1,4 +1,4 @@
-defmodule PlutusWeb.Params.AccountId
+defmodule PlutusWeb.Params.AccountId do
   use Ecto.Type
   
   alias Plutus.Models.Account
@@ -22,7 +22,7 @@ defmodule PlutusWeb.Params.AccountId
   # Dumping transform to raw format (i.e. obfuscated)
   def dump(id), do: id
 
-  defp get_account(id) do
+  def get_account(id) do
     case Account.get_by_id(id) do
       {:ok, _account} ->
         {:ok, id}
