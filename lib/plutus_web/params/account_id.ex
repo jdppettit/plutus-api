@@ -1,7 +1,7 @@
 defmodule PlutusWeb.Params.AccountId do
   use Ecto.Type
   
-  alias Plutus.Models.Account
+  alias Plutus.Model.Account
 
   def type, do: :integer
 
@@ -10,7 +10,8 @@ defmodule PlutusWeb.Params.AccountId do
   end
 
   def cast(id) when is_binary(id) do
-    parsed_id = Integer.parse(id)
+    {parsed_id, _} = Integer.parse(id)
+    IO.inspect(parsed_id, label: "--------------------------")
     get_account(parsed_id)
   end
 

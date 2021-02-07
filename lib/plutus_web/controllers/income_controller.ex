@@ -39,15 +39,18 @@ defmodule PlutusWeb.IncomeController do
 
   defparams(
     get_all_params(%{
-      account_id!: AccountId,
-      id!: IncomeId
+      account_id!: AccountId
     })
   )
 
   def get_all(conn, raw_params) do 
-    with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params)},
-         parsed_params <- Params.to_map(params_changeset) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_all_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, incomes} <- Income.get_all_income_for_account(parsed_params.account_id) do
+          IO.inspect(incomes)
+          IO.inspect("--------------------------------")
       conn
+      |> render("incomes.json", incomes: incomes)
     else
       {:validation, _} ->
         conn

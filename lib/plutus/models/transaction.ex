@@ -1,8 +1,13 @@
 defmodule Plutus.Model.Transaction do
   use Ecto.Schema
+
   import Ecto.Changeset
   import Ecto.Query
+  
+  alias Plutus.Repo
+
   require Logger
+
 
   schema "transaction" do
     field :description, :string
@@ -51,12 +56,32 @@ defmodule Plutus.Model.Transaction do
     end
   end
 
+  def get_by_id(id) do
+    case Repo.get(__MODULE__, id) do
+      nil ->
+        {:error, :not_found}
+      model ->
+        {:ok, model}
+    end
+  end 
+  
   def insert(changeset) do
-    case Plutus.Repo.insert(changeset) do
+    case Repo.insert(changeset) do
       {:ok, model} ->
         {:ok, model}
 
       _ ->
+        Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
+        {:error, :database_error}
+    end
+  end
+
+  def update(changeset) do
+    case Repo.update(changeset) do
+      {:ok, model} ->
+        {:ok, model}
+
+      {_, _} ->
         Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
         {:error, :database_error}
     end
@@ -69,5 +94,17 @@ defmodule Plutus.Model.Transaction do
       model ->
         __MODULE__.create_changeset(model, map)
     end 
+  end
+
+  def get_all_transactions_for_account(account_id) do
+    query = from transaction in __MODULE__,
+      where: transaction.account_id == ^account_id
+    case Plutus.Repo.all(query) do
+      transactions ->
+        {:ok, transactions}
+      {:error, error} ->
+        Logger.error("#{__MODULE__} Error querying entry record #{inspect(error)}")
+        {:error, :not_found}
+    end
   end
 end

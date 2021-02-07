@@ -1,7 +1,11 @@
 defmodule Plutus.Model.Account do
   use Ecto.Schema
+
   import Ecto.Changeset
   import Ecto.Query
+
+  alias Plutus.Repo
+  
   require Logger
 
   schema "account" do
@@ -52,8 +56,17 @@ defmodule Plutus.Model.Account do
     end
   end
 
+  def get_by_id(id) do
+    case Repo.get(__MODULE__, id) do
+      nil ->
+        {:error, :not_found}
+      model ->
+        {:ok, model}
+    end
+  end 
+  
   def insert(changeset) do
-    case Plutus.Repo.insert(changeset) do
+    case Repo.insert(changeset) do
       {:ok, model} ->
         {:ok, model}
 
@@ -64,22 +77,13 @@ defmodule Plutus.Model.Account do
   end
 
   def update(changeset) do
-    case Plutus.Repo.update(changeset) do
+    case Repo.update(changeset) do
       {:ok, model} ->
         {:ok, model}
 
       {_, _} ->
         Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
         {:error, :database_error}
-    end
-  end
-
-  def get_by_id(id) do
-    case Plutus.Repo.get(__MODULE__, id) do
-      nil ->
-        {:error, :not_found}
-      model ->
-        {:ok, model}
     end
   end
 
