@@ -1,4 +1,4 @@
-defmodule Plutus.Model.Expense do
+defmodule Plutus.Model.Event do
   use Ecto.Schema
 
   import Ecto.Changeset
@@ -8,13 +8,17 @@ defmodule Plutus.Model.Expense do
   
   require Logger
 
-  schema "expense" do
+  schema "event" do
+    field :target_id, :integer
+    field :type, EventType
+    field :anticipated_date, :date
+    field :settled, :boolean
+    field :precompute_date, :date
     field :amount, :float
+    field :previous_target_id, :integer
     field :description, :string
 
     timestamps()
-
-    belongs_to :income, Plutus.Model.Income
   end
 
   def changeset(model, attrs) do
@@ -22,7 +26,10 @@ defmodule Plutus.Model.Expense do
     |> cast(attrs, __schema__(:fields))
     |> validate_required([
       :amount,
-      :description
+      :description,
+      :target_id,
+      :type,
+      :precompute_date
     ])
   end
 
@@ -76,18 +83,6 @@ defmodule Plutus.Model.Expense do
       {_, _} ->
         Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
         {:error, :database_error}
-    end
-  end
-
-  def get_all_expenses_for_income(income_id) do
-    query = from expense in __MODULE__,
-      where: expense.income_id == ^income_id
-    case Plutus.Repo.all(query) do
-      expenses ->
-        {:ok, expenses}
-      {:error, error} ->
-        Logger.error("#{__MODULE__} Error querying entry record #{inspect(error)}")
-        {:error, :not_found}
     end
   end
 end

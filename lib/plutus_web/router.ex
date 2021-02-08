@@ -8,10 +8,6 @@ defmodule PlutusWeb.Router do
   scope "/api/v1", PlutusWeb do
     pipe_through(:api)
 
-    post "/account/:account_id/income", IncomeController, :create
-    get "/account/:account_id/income", IncomeController, :get_all
-    get "/account/:account_id/income/:id", IncomeController, :get
-
     get "/account/linktoken", AccountController, :link_token
     post "/account", AccountController, :create
     get "/account/:id", AccountController, :get
@@ -19,5 +15,13 @@ defmodule PlutusWeb.Router do
 
     get "/account/:account_id/transaction", TransactionController, :get_all
     get "/account/:account_id/transaction/:id", TransactionController, :get
+
+    post "/account/:account_id/income", IncomeController, :create
+    get "/account/:account_id/income", IncomeController, :get_all
+    get "/account/:account_id/income/:id", IncomeController, :get
+
+    post "/account/:account_id/income/:income_id/expense", ExpenseController, :create
+    get "/account/:account_id/income/:income_id/expense", ExpenseController, :get_all
+    get "/account/:account_id/income/:income_id/expense/:id", ExpenseController, :get
   end
 end

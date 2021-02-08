@@ -13,6 +13,7 @@ defmodule PlutusWeb.IncomeView do
     |> Enum.map(fn income -> 
       %{
         id: income.id,
+        account_id: income.account_id,
         description: income.description,
         recurring: income.recurring,
         day_of_month: income.day_of_month,
@@ -23,6 +24,21 @@ defmodule PlutusWeb.IncomeView do
     %{
       message: "incomes retrieved successfully",
       incomes: parsed_incomes
+    }
+  end
+
+  def render("income.json", %{income: income}) do
+    %{
+      message: "income retrieved successfully",
+      income: %{
+        id: income.id,
+        account_id: income.account_id,
+        description: income.description,
+        recurring: income.recurring,
+        day_of_month: income.day_of_month,
+        day_of_week: income.day_of_week,
+        amount: income.amount     
+      }
     }
   end
 

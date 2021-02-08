@@ -17,12 +17,17 @@ defmodule Plutus.Application do
       %{
         id: Plutus.Supervisor.PlaidSupervisor,
         start: {Plutus.Supervisor.PlaidSupervisor, :start_link, [[]]}
+      },
+      %{
+        id: Plutus.Supervisor.PrecomputeSupervisor,
+        start: {Plutus.Supervisor.PrecomputeSupervisor, :start_link, [[]]}
       }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Plutus.Supervisor]
+    Holidays.Definitions.Nyse.init() |> IO.inspect(label: "ret from holidays")
     Supervisor.start_link(children, opts)
   end
 

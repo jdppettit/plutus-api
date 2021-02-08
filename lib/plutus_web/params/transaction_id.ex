@@ -10,7 +10,7 @@ defmodule PlutusWeb.Params.TransactionId do
   end
 
   def cast(id) when is_binary(id) do
-    parsed_id = Integer.parse(id)
+    {parsed_id, _} = Integer.parse(id)
     get_transaction(parsed_id)
   end
 

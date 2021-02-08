@@ -1,17 +1,17 @@
-defmodule PlutusWeb.Params.IncomeId do
+defmodule PlutusWeb.Params.ExpenseId do
   use Ecto.Type
   
-  alias Plutus.Model.Income
+  alias Plutus.Model.Expense
 
   def type, do: :integer
 
   def cast(id) when is_integer(id) do
-    get_income(id)
+    get_expense(id)
   end
 
   def cast(id) when is_binary(id) do
     {parsed_id, _} = Integer.parse(id)
-    get_income(parsed_id)
+    get_expense(parsed_id)
   end
 
   def cast(_), do: :error
@@ -22,9 +22,9 @@ defmodule PlutusWeb.Params.IncomeId do
   # Dumping transform to raw format (i.e. obfuscated)
   def dump(id), do: id
 
-  defp get_income(id) do
-    case Income.get_by_id(id) do
-      {:ok, _income} ->
+  defp get_expense(id) do
+    case Expense.get_by_id(id) do
+      {:ok, _expense} ->
         {:ok, id}
       _ ->
         :error

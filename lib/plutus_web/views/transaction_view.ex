@@ -25,6 +25,19 @@ defmodule PlutusWeb.TransactionView do
     }
   end
 
+  def render("transaction.json", %{transaction: transaction}) do
+    %{
+      message: "transaction retrieved successfully",
+      transaction: %{
+        id: transaction.id,
+        description: transaction.description,
+        amount: transaction.amount,
+        pending: transaction.pending,
+        date: transaction.date
+      }
+    }
+  end
+
   def render("bad_request.json", message) do
     %{
       message: message

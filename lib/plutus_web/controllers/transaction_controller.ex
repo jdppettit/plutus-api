@@ -37,6 +37,20 @@ defmodule PlutusWeb.TransactionController do
   )
 
   def get(conn, raw_params) do
-    conn
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, transaction} <- Transaction.get_by_id(parsed_params.id) do
+      conn
+      |> render("transaction.json", transaction: transaction)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")
+    end
   end
 end 

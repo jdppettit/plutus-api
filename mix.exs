@@ -16,7 +16,7 @@ end
 
   def application do
     [
-      extra_applications: [:logger, :runtime_tools],
+      extra_applications: [:logger, :runtime_tools, :holidays],
       mod: {Plutus.Application, []}
     ]
   end
@@ -43,7 +43,9 @@ end
       {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.2"},
       {:plaid, "~> 2.0", hex: :plaid_elixir},
-      {:poison, "~> 4.0", override: true}
+      {:poison, "~> 4.0", override: true},
+      {:timex, "~> 3.6"},
+      {:holidays, "~> 0.2.4"}
     ]
   end
 
