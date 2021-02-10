@@ -47,4 +47,10 @@ defmodule PlutusWeb.EventView do
       message: message
     }
   end
+
+  def render("precompute.json", %{message: message}) do
+    %{
+      message: message
+    }
+  end
 end

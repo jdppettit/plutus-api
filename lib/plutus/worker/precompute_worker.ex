@@ -85,9 +85,14 @@ defmodule Plutus.Worker.PrecomputeWorker do
   def get_anticipated_date(income, index) do
     # first create a naive date time from current year + month + day of month in income
     # then shift that however many months in the future that we are looking to precompute for
-    date = PDate.assemble_date_from_day_of_month(income.day_of_month)
-    |> PDate.shift_months(index)
-
+    date = if income.day_of_month == 99 do
+      date = PDate.assemble_date_from_day_of_month(1)
+      |> PDate.shift_months(index)
+      |> PDate.end_of_month
+    else
+      date = PDate.assemble_date_from_day_of_month(income.day_of_month)
+      |> PDate.shift_months(index)
+    end
     # now we need to look to see if the given date is a bank holiday
     # if it is, start iterating backwards until it finds the next non-holiday business day
     case PDate.is_bank_holiday?(date) do
@@ -96,6 +101,7 @@ defmodule Plutus.Worker.PrecomputeWorker do
       false ->
         date
     end
+
   end
 
   def filter_valid_accounts(accounts) do
@@ -103,5 +109,10 @@ defmodule Plutus.Worker.PrecomputeWorker do
     |> Enum.filter(fn account -> 
       !is_nil(Map.get(account, :access_token, nil))
     end)
+  end
+
+  def adhoc_precompute() do
+    valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
+    :ok = do_precompute(valid_accounts)  
   end
 end

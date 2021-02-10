@@ -2,7 +2,8 @@ defmodule PlutusWeb.EventController do
   use PlutusWeb, :controller
   use Params
 
-  alias Plutus.Model.Event
+  alias Plutus.Model.{Event,Account}
+  alias Plutus.Worker.PrecomputeWorker
   alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate}
 
   require Logger
@@ -31,5 +32,24 @@ defmodule PlutusWeb.EventController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")  
     end
+  end
+
+  def precompute(conn, _params) do
+    with :ok <- PrecomputeWorker.adhoc_precompute() do
+      conn
+      |> render("precompute.json", message: "precompute running")
+    else 
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "precompute fail")      
+    end
+  end
+
+  def filter_valid_accounts(accounts) do
+    accounts
+    |> Enum.filter(fn account -> 
+      !is_nil(Map.get(account, :access_token, nil))
+    end)
   end
 end 

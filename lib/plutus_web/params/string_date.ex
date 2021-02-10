@@ -4,7 +4,10 @@ defmodule PlutusWeb.Params.StringDate do
   def type, do: :string
 
   def cast(date) when is_binary(date) do
-    {:ok, date} = Jason.decode(date)
+    date = case Jason.decode(date) do
+      {:ok, parsed_date} -> parsed_date
+      _ -> date
+    end
     {:ok, date} = Timex.parse(date, "{YYYY}-{0M}-{0D}")
   end
 

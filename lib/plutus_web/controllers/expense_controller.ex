@@ -3,6 +3,7 @@ defmodule PlutusWeb.ExpenseController do
   use Params
 
   alias Plutus.Model.Expense
+  alias Plutus.Worker.PrecomputeWorker
   alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId}
 
   require Logger
@@ -20,7 +21,8 @@ defmodule PlutusWeb.ExpenseController do
     with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
          {:ok, changeset} <- Expense.create_changeset(parsed_params),
-         {:ok, model} <- Expense.insert(changeset) do
+         {:ok, model} <- Expense.insert(changeset),
+         :ok <- PrecomputeWorker.adhoc_precompute do
       conn
       |> render("expense_created.json", expense: model)
     else

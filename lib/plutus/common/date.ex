@@ -13,6 +13,11 @@ defmodule Plutus.Common.Date do
     |> Timex.beginning_of_month
   end
 
+  def end_of_month(date) do
+    date
+    |> Timex.end_of_month
+  end
+
   def get_end_of_month() do
     get_current_date()
     |> Timex.end_of_month

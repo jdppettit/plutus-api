@@ -3,6 +3,7 @@ defmodule PlutusWeb.IncomeController do
   use Params
 
   alias Plutus.Model.Income
+  alias Plutus.Worker.PrecomputeWorker
   alias PlutusWeb.Params.{AccountId, IncomeId}
 
   require Logger
@@ -22,7 +23,8 @@ defmodule PlutusWeb.IncomeController do
     with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
          {:ok, changeset} <- Income.create_changeset(parsed_params),
-         {:ok, model} <- Income.insert(changeset) do
+         {:ok, model} <- Income.insert(changeset),
+         :ok <- PrecomputeWorker.adhoc_precompute do
       conn
       |> render("income_created.json", income: model)
     else
