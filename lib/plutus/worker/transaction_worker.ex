@@ -6,6 +6,7 @@ defmodule Plutus.Worker.TransactionWorker do
   require Logger
 
   @minus_days -30
+  @interval 86_400_000 # 1 day
 
   def start_link() do
     GenServer.start_link(

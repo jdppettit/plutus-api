@@ -23,5 +23,7 @@ defmodule PlutusWeb.Router do
     post "/account/:account_id/income/:income_id/expense", ExpenseController, :create
     get "/account/:account_id/income/:income_id/expense", ExpenseController, :get_all
     get "/account/:account_id/income/:income_id/expense/:id", ExpenseController, :get
+
+    get "/account/:account_id/event", EventController, :get_by_window
   end
 end

@@ -11,7 +11,6 @@ defmodule PlutusWeb.Params.AccountId do
 
   def cast(id) when is_binary(id) do
     {parsed_id, _} = Integer.parse(id)
-    IO.inspect(parsed_id, label: "--------------------------")
     get_account(parsed_id)
   end
 

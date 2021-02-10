@@ -5,6 +5,7 @@ defmodule Plutus.Model.Event do
   import Ecto.Query
 
   alias Plutus.Repo
+  alias Plutus.Common.Date, as: PDate
   
   require Logger
 
@@ -17,6 +18,8 @@ defmodule Plutus.Model.Event do
     field :amount, :float
     field :previous_target_id, :integer
     field :description, :string
+    field :parent_id, :integer
+    field :account_id, :integer
 
     timestamps()
   end
@@ -84,5 +87,50 @@ defmodule Plutus.Model.Event do
         Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
         {:error, :database_error}
     end
+  end
+
+  def guess_and_create_changeset(map) do
+    case Plutus.Repo.get_by(__MODULE__, 
+      [target_id: map.target_id, type: map.type, precompute_date: map.precompute_date]
+    ) do
+      nil ->
+        __MODULE__.create_changeset(map)
+      model ->
+        __MODULE__.create_changeset(model, map)
+    end 
+  end
+
+  def maybe_insert(%{type: :income} = map) do
+    model = Plutus.Repo.get_by(__MODULE__, 
+      [target_id: map.target_id, type: map.type, anticipated_date: map.anticipated_date]
+    )
+    if is_nil(model) do
+      {:ok, changeset} = __MODULE__.create_changeset(map)
+      {:ok, model} = Repo.insert_or_update(changeset)
+    else
+      {:ok, model}
+    end
+  end
+
+  def maybe_insert(%{type: :expense} = map) do
+    model = Plutus.Repo.get_by(__MODULE__, 
+      [target_id: map.target_id, type: map.type, parent_id: map.parent_id]
+    )
+    if is_nil(model) do
+      {:ok, changeset} = __MODULE__.create_changeset(map)
+      {:ok, model} = Repo.insert_or_update(changeset)
+    else
+      {:ok, model}
+    end
+  end
+
+  def get_by_window(%{account_id: account_id, window_start: window_start, window_end: window_end}) do
+    query = from(event in __MODULE__,
+      where: event.account_id == ^account_id,
+      where: event.anticipated_date >= ^window_start,
+      where: event.anticipated_date <= ^window_end,
+      order_by: [asc: event.anticipated_date]
+    )
+    Plutus.Repo.all(query)
   end
 end

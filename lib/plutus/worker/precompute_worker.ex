@@ -8,6 +8,7 @@ defmodule Plutus.Worker.PrecomputeWorker do
   require Logger
 
   @precompute_months 3
+  @interval 604_800_000 # 1 week
 
   def start_link() do
     GenServer.start_link(
@@ -27,10 +28,9 @@ defmodule Plutus.Worker.PrecomputeWorker do
   def handle_info(:precompute, precompute_struct) do
     Logger.debug("#{__MODULE__}: Starting precompute now")
     valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
-    IO.inspect(valid_accounts, label: "valid accounts")
     :ok = do_precompute(valid_accounts)
     precompute_struct = precompute_struct |> Precompute.set_last_precompute_now
-    Process.send_after(self(), :precompute, 1_000_000)
+    Process.send_after(self(), :precompute, @interval)
     {:noreply, precompute_struct}
   end
 
@@ -38,7 +38,6 @@ defmodule Plutus.Worker.PrecomputeWorker do
     accounts
     |> Enum.map(fn account ->
       {:ok, incomes} = Income.get_all_income_for_account(account.id)
-      IO.inspect(incomes, label: "incomes")
       process_income(account, incomes)
     end)
     :ok
@@ -51,18 +50,36 @@ defmodule Plutus.Worker.PrecomputeWorker do
       # for each income instance, make an event for each month
       # in precompute window
       Enum.each(0..@precompute_months, fn index -> 
-        IO.inspect("creating event for income #{income.description} with index #{index}")
-        {:ok, changeset} = Event.create_changeset(%{
+        {:ok, model} = Event.maybe_insert(%{
           amount: income.amount,
           description: income.description,
           target_id: income.id,
           type: :income,
           precompute_date: precompute_date,
-          anticipated_date: get_anticipated_date(income, index)
+          anticipated_date: get_anticipated_date(income, index),
+          parent_id: nil,
+          account_id: income.account_id
         })
-        IO.inspect(changeset, label: "changeset")
+        process_expense(model)
       end)
     end)
+  end
+
+  def process_expense(%{anticipated_date: anticipated_date, account_id: account_id, target_id: id, id: parent_id, precompute_date: precompute_date} = _model) do
+    {:ok, expenses} = Expense.get_all_expenses_for_income(id)
+    expenses
+    |> Enum.map(fn expense ->
+        {:ok, model} = Event.maybe_insert(%{
+          amount: expense.amount,
+          description: expense.description,
+          target_id: expense.id,
+          type: :expense,
+          precompute_date: precompute_date,
+          anticipated_date: anticipated_date,
+          parent_id: parent_id,
+          account_id: account_id
+        })
+      end)
   end
 
   def get_anticipated_date(income, index) do
