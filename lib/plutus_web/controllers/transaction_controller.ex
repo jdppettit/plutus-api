@@ -3,7 +3,7 @@ defmodule PlutusWeb.TransactionController do
   use Params
 
   alias Plutus.Model.Transaction
-  alias PlutusWeb.Params.{AccountId, TransactionId}
+  alias PlutusWeb.Params.{AccountId, TransactionId, StringDate}
 
   defparams(
     get_all_params(%{
@@ -51,6 +51,32 @@ defmodule PlutusWeb.TransactionController do
         conn
         |> put_status(500)
         |> render("bad_request.json", message: "database error")
+    end
+  end
+
+  defparams(
+    get_window_params(%{
+      account_id!: AccountId,
+      window_start!: StringDate,
+      window_end!: StringDate
+    })
+  )
+
+  def get_by_window(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_window_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         transactions <- Transaction.get_by_window(parsed_params) do
+      conn
+      |> render("transactions.json", transactions: transactions)
+    else 
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
     end
   end
 end 
