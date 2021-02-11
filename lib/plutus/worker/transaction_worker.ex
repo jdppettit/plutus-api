@@ -26,7 +26,7 @@ defmodule Plutus.Worker.TransactionWorker do
     Logger.debug("#{__MODULE__}: Getting transactions now")
     accounts = Account.get_all_accounts()
     :ok = process_transactions(accounts)
-    Process.send_after(self(), :get_transactions, 10_000)
+    Process.send_after(self(), :get_transactions, @interval)
     {:noreply, nil}
   end
 

@@ -12,7 +12,12 @@ defmodule PlutusWeb.AccountView do
     %{
       message: "account created",
       account: %{
-        id: account.id
+        id: account.id,
+        description: account.description,
+        remote_id: account.remote_id,
+        balance: account.balance,
+        last_refreshed: account.last_refreshed,
+        account_name: account.account_name
       }
     }
   end
@@ -28,7 +33,11 @@ defmodule PlutusWeb.AccountView do
       message: "account get success",
       account: %{
         id: account.id,
-        description: account.description
+        description: account.description,
+        remote_id: account.remote_id,
+        balance: account.balance,
+        last_refreshed: account.last_refreshed,
+        account_name: account.account_name
       }
     }
   end
@@ -38,7 +47,11 @@ defmodule PlutusWeb.AccountView do
     |> Enum.map(fn account -> 
       %{
         id: account.id,
-        description: account.description
+        description: account.description,
+        remote_id: account.remote_id,
+        balance: account.balance,
+        last_refreshed: account.last_refreshed,
+        account_name: account.account_name
       }
     end)
 

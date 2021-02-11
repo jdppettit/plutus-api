@@ -25,15 +25,20 @@ defmodule PlutusWeb.AccountController do
   defparams(
     create_params(%{
       description: :string,
-      public_token!: :string
+      public_token!: :string,
+      account_name: :string,
+      last_four: :integer,
+      remote_id: :string
     })
   )
 
   def create(conn, raw_params) do
-    with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params)},
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params) |> IO.inspect},
          parsed_params <- Params.to_map(params_changeset),
          {:ok, %{access_token: access_token} = resp} <- Plaid.Item.exchange_public_token(%{public_token: raw_params["public_token"]}),
-         {:ok, parsed_params} <- {:ok, Map.put(raw_params, "access_token", access_token)},
+         {:ok, plaid_info} <- Plaid.Accounts.get_balance(%{access_token: access_token, options: %{account_ids: [raw_params["remote_id"]]}}),
+         {:ok, parsed_params} <- {:ok, update_params_with_balance(parsed_params, plaid_info)},
+         {:ok, parsed_params} <- {:ok, Map.put(parsed_params, :access_token, access_token)},
          {:ok, changeset} <- Account.create_changeset(parsed_params),
          {:ok, model} <- Account.insert(changeset) do
       conn
@@ -92,5 +97,11 @@ defmodule PlutusWeb.AccountController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")
     end 
+  end
+
+  def update_params_with_balance(parsed_params, plaid_info) do
+    [first_account | _] = plaid_info.accounts
+    balance = first_account.balances.available
+    Map.put(parsed_params, :balance, balance)
   end
 end

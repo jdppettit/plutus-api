@@ -21,6 +21,10 @@ defmodule Plutus.Application do
       %{
         id: Plutus.Supervisor.PrecomputeSupervisor,
         start: {Plutus.Supervisor.PrecomputeSupervisor, :start_link, [[]]}
+      },
+      %{
+        id: Plutus.Supervisor.MatchSupervisor,
+        start: {Plutus.Supervisor.MatchSupervisor, :start_link, [[]]}
       }
     ]
 
