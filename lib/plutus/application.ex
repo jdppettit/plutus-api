@@ -25,6 +25,10 @@ defmodule Plutus.Application do
       %{
         id: Plutus.Supervisor.MatchSupervisor,
         start: {Plutus.Supervisor.MatchSupervisor, :start_link, [[]]}
+      },
+      %{
+        id: Plutus.Supervisor.SettlementSupervisor,
+        start: {Plutus.Supervisor.SettlementSupervisor, :start_link, [[]]}
       }
     ]
 

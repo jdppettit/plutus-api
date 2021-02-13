@@ -137,8 +137,6 @@ defmodule Plutus.Model.Event do
   def get_current_income_event(account_id) do
     current_date = PDate.get_current_date()
     beginning_of_month = PDate.get_beginning_of_month()
-    IO.inspect(current_date, label: "cd")
-    IO.inspect(beginning_of_month, label: "bom")
     query = from(event in __MODULE__,
       where: event.account_id == ^account_id,
       where: event.anticipated_date >= ^beginning_of_month,
@@ -158,7 +156,7 @@ defmodule Plutus.Model.Event do
       where: is_nil(event.settled)
     )
     {:ok, Plutus.Repo.all(query)}
-  end 
+  end
 
   def set_settled(model) do
     {:ok, changeset} = __MODULE__.create_changeset(model, %{settled: true})

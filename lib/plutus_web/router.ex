@@ -25,6 +25,7 @@ defmodule PlutusWeb.Router do
     get "/account/:account_id/income/:income_id/expense", ExpenseController, :get_all
     get "/account/:account_id/income/:income_id/expense/:id", ExpenseController, :get
 
+    get "/account/:account_id/event/income/current", EventController, :get_current_income
     get "/account/:account_id/event", EventController, :get_by_window
     get "/precompute", EventController, :precompute
   end

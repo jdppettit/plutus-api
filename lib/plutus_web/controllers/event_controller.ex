@@ -17,7 +17,7 @@ defmodule PlutusWeb.EventController do
   )
 
   def get_by_window(conn, raw_params) do
-    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_window_params(raw_params) |> IO.inspect},
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_window_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
          events <- Event.get_by_window(parsed_params) do
       conn
@@ -44,6 +44,30 @@ defmodule PlutusWeb.EventController do
         |> put_status(500)
         |> render("bad_request.json", message: "precompute fail")      
     end
+  end
+
+  defparams(
+    current_income_params(%{
+      account_id!: AccountId
+    })
+  )
+
+  def get_current_income(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, current_income_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         event <- Event.get_current_income_event(parsed_params) do
+      conn
+      |> render("event.json", event: event)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
+    end 
   end
 
   def filter_valid_accounts(accounts) do
