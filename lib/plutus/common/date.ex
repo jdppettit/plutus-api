@@ -23,6 +23,11 @@ defmodule Plutus.Common.Date do
     |> Timex.end_of_month
   end
 
+  def one_month_ago() do
+    get_current_date
+    |> shift_months(-1)
+  end
+
   def day() do
     get_current_date.day
   end
@@ -66,7 +71,7 @@ defmodule Plutus.Common.Date do
   end
 
   def is_business_day?(date) do
-    day_of_week = Date.day_of_week(date) |> IO.inspect
+    day_of_week = Date.day_of_week(date)
     Enum.member?(@week_days, day_of_week)
   end
 end

@@ -7,7 +7,7 @@ defmodule Plutus.Worker.SettlementWorker do
 
   require Logger
 
-  @interval 3_600 # 1 hour
+  @interval 3_600_000 # 1 hour
 
   def start_link() do
     GenServer.start_link(
@@ -32,6 +32,18 @@ defmodule Plutus.Worker.SettlementWorker do
   end
 
   def do_settlement(accounts) do
+    accounts
+    |> Enum.map(fn account -> 
+      Logger.debug("#{__MODULE__}: Starting settlment for account #{account.id}")
+      Event.get_current_income_events(account.id) 
+      |> Enum.with_index
+      |> Enum.map(fn {event, index} -> 
+        if index !== 0 do
+          Logger.info("#{__MODULE__}: Settling income #{event.id}")
+          Event.set_settled(event)
+        end
+      end)
+    end)
     :ok
   end
 

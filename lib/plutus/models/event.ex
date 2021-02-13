@@ -129,6 +129,7 @@ defmodule Plutus.Model.Event do
       where: event.account_id == ^account_id,
       where: event.anticipated_date >= ^window_start,
       where: event.anticipated_date <= ^window_end,
+      where: is_nil(event.settled),
       order_by: [asc: event.anticipated_date]
     )
     Plutus.Repo.all(query)
@@ -145,6 +146,20 @@ defmodule Plutus.Model.Event do
       where: is_nil(event.settled)
     )
     {:ok, Plutus.Repo.one(query)}
+  end
+
+  def get_current_income_events(account_id) do
+    current_date = PDate.get_current_date()
+    one_month_ago = PDate.one_month_ago()
+    query = from(event in __MODULE__,
+      where: event.account_id == ^account_id,
+      where: event.anticipated_date >= ^one_month_ago,
+      where: event.anticipated_date <= ^current_date,
+      where: event.type == ^"income",
+      where: is_nil(event.settled),
+      order_by: [desc: event.anticipated_date]
+    )
+    Plutus.Repo.all(query)
   end
 
   def get_expenses_for_income(parent_id) do
