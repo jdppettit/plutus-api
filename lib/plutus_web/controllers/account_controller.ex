@@ -86,7 +86,8 @@ defmodule PlutusWeb.AccountController do
   end
 
   def get_all(conn, _params) do
-    with models <- Account.get_all_accounts() do
+    with models <- Account.get_all_accounts(),
+         models <- update_accounts_with_balance(models) do
       conn
       |> render("accounts.json", accounts: models)
     else 
@@ -105,5 +106,13 @@ defmodule PlutusWeb.AccountController do
     [first_account | _] = plaid_info.accounts
     balance = first_account.balances.available
     Map.put(parsed_params, :balance, balance)
+  end
+
+  def update_accounts_with_balance(models) do
+    models
+    |> Enum.map(fn model -> 
+      {:ok, model} = Balance.add_computed_values(model)
+      model
+    end)
   end
 end

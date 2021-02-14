@@ -52,6 +52,8 @@ defmodule PlutusWeb.AccountView do
         description: account.description,
         remote_id: account.remote_id,
         balance: account.balance,
+        computed_balance: account.computed_balance,
+        computed_expenses: account.computed_expenses,
         last_refreshed: account.last_refreshed,
         account_name: account.account_name
       }
