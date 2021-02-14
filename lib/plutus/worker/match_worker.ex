@@ -18,13 +18,13 @@ defmodule Plutus.Worker.MatchWorker do
   end
 
   def init(_) do
-    Logger.debug("#{__MODULE__}: Initializing genserver for match processing")
+    Logger.info("#{__MODULE__}: Initializing genserver for match processing")
     Process.send_after(self(), :match, 1_000)
     {:ok, nil}
   end
 
   def handle_info(:match, _) do
-    Logger.debug("#{__MODULE__}: Starting match now")
+    Logger.info("#{__MODULE__}: Starting match now")
     valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
     :ok = do_match(valid_accounts)
     Process.send_after(self(), :match, @interval)
@@ -34,7 +34,7 @@ defmodule Plutus.Worker.MatchWorker do
   def do_match(accounts) do
     accounts
     |> Enum.map(fn account ->
-      Logger.debug("#{__MODULE__}: Starting match for account #{account.id}")
+      Logger.info("#{__MODULE__}: Starting match for account #{account.id}")
       {:ok, current_income} = Event.get_current_income_event(account.id)
       if not is_nil(current_income) do
         {:ok, expenses_for_income} = Event.get_expenses_for_income(current_income.id)
@@ -65,7 +65,7 @@ defmodule Plutus.Worker.MatchWorker do
         if expense.amount == transaction.amount && 
            String.downcase(expense.description) == String.downcase(transaction.description) 
         do
-          Logger.debug("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
+          Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
           Event.set_settled(expense)
         end
       end)

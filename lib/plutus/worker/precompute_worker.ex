@@ -19,14 +19,14 @@ defmodule Plutus.Worker.PrecomputeWorker do
   end
 
   def init(_) do
-    Logger.debug("#{__MODULE__}: Initializing genserver for precompute processing")
+    Logger.info("#{__MODULE__}: Initializing genserver for precompute processing")
     Process.send_after(self(), :precompute, 1_000)
     precompute_struct = Precompute.build(%{last_run: DateTime.utc_now()})
     {:ok, precompute_struct}
   end
 
   def handle_info(:precompute, precompute_struct) do
-    Logger.debug("#{__MODULE__}: Starting precompute now")
+    Logger.info("#{__MODULE__}: Starting precompute now")
     valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
     :ok = do_precompute(valid_accounts)
     precompute_struct = precompute_struct |> Precompute.set_last_precompute_now

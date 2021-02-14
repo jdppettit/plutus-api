@@ -87,6 +87,11 @@ defmodule Plutus.Model.Account do
     end
   end
 
+  def set_balance(model, balance) do
+    {:ok, changeset} = __MODULE__.create_changeset(model, %{balance: balance})
+    {:ok, model} = __MODULE__.update(changeset) 
+  end
+
   def get_all_accounts() do
     Plutus.Repo.all(__MODULE__)
   end

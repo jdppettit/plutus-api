@@ -3,6 +3,7 @@ defmodule PlutusWeb.AccountController do
   use Params
 
   alias Plutus.Model.Account
+  alias Plutus.Common.Balance
 
   require Logger
 
@@ -64,7 +65,8 @@ defmodule PlutusWeb.AccountController do
   def get(conn, raw_params) do
     with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
-         {:ok, model} <- Account.get_by_id(raw_params["id"]) do
+         {:ok, model} <- Account.get_by_id(parsed_params.id),
+         {:ok, model} <- Balance.add_computed_values(model) do
       conn
       |> render("account.json", account: model)
     else

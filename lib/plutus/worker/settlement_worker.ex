@@ -18,13 +18,13 @@ defmodule Plutus.Worker.SettlementWorker do
   end
 
   def init(_) do
-    Logger.debug("#{__MODULE__}: Initializing genserver for settlement processing")
+    Logger.info("#{__MODULE__}: Initializing genserver for settlement processing")
     Process.send_after(self(), :settlement, 1_000)
     {:ok, nil}
   end
 
   def handle_info(:settlement, _) do
-    Logger.debug("#{__MODULE__}: Starting settlement now")
+    Logger.info("#{__MODULE__}: Starting settlement now")
     valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
     :ok = do_settlement(valid_accounts)
     Process.send_after(self(), :settlement, @interval)
@@ -34,7 +34,7 @@ defmodule Plutus.Worker.SettlementWorker do
   def do_settlement(accounts) do
     accounts
     |> Enum.map(fn account -> 
-      Logger.debug("#{__MODULE__}: Starting settlment for account #{account.id}")
+      Logger.info("#{__MODULE__}: Starting settlment for account #{account.id}")
       Event.get_current_income_events(account.id) 
       |> Enum.with_index
       |> Enum.map(fn {event, index} -> 

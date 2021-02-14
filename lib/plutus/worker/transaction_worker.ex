@@ -17,13 +17,13 @@ defmodule Plutus.Worker.TransactionWorker do
   end
 
   def init(_) do
-    Logger.debug("#{__MODULE__}: Initializing genserver for transaction processing")
+    Logger.info("#{__MODULE__}: Initializing genserver for transaction processing")
     Process.send_after(self(), :get_transactions, 1_000)
     {:ok, nil}
   end
 
   def handle_info(:get_transactions, _) do
-    Logger.debug("#{__MODULE__}: Getting transactions now")
+    Logger.info("#{__MODULE__}: Getting transactions now")
     accounts = Account.get_all_accounts()
     :ok = process_transactions(accounts)
     Process.send_after(self(), :get_transactions, @interval)

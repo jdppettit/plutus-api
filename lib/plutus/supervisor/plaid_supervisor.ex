@@ -27,5 +27,9 @@ defmodule Plutus.Supervisor.PlaidSupervisor do
       id: Worker.TransactionWorker,
       start: {Worker.TransactionWorker, :start_link, []}
     })
+    DynamicSupervisor.start_child(__MODULE__, %{
+      id: Worker.AccountWorker,
+      start: {Worker.AccountWorker, :start_link, []}
+    })
   end
 end
