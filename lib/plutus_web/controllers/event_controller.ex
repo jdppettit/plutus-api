@@ -3,7 +3,7 @@ defmodule PlutusWeb.EventController do
   use Params
 
   alias Plutus.Model.{Event,Account}
-  alias Plutus.Worker.PrecomputeWorker
+  alias Plutus.Worker.{PrecomputeWorker,SettlementWorker,MatchWorker}
   alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate}
 
   require Logger
@@ -43,6 +43,30 @@ defmodule PlutusWeb.EventController do
         conn
         |> put_status(500)
         |> render("bad_request.json", message: "precompute fail")      
+    end
+  end
+
+  def settlement(conn, _params) do
+    with :ok <- SettlementWorker.adhoc_settlement do
+      conn
+      |> render("settlement.json")
+    else
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "unexpected error")
+    end
+  end
+
+  def match(conn, _params) do
+    with :ok <- MatchWorker.adhoc_match do
+      conn
+      |> render("match.json")
+    else
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "unexpected error")
     end
   end
 

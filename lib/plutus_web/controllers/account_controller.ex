@@ -4,6 +4,7 @@ defmodule PlutusWeb.AccountController do
 
   alias Plutus.Model.Account
   alias Plutus.Common.Balance
+  alias Plutus.Worker.AccountWorker
 
   require Logger
 
@@ -129,6 +130,18 @@ defmodule PlutusWeb.AccountController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")
     end 
+  end
+
+  def update_balances(conn, _params) do
+    with :ok <- AccountWorker.adhoc_refresh do
+      conn
+      |> render("update_balances.json")
+    else
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "unexpected error")
+    end
   end
 
   def update_params_with_balance(parsed_params, plaid_info) do

@@ -2,6 +2,7 @@ defmodule Plutus.Worker.TransactionWorker do
   use GenServer
 
   alias Plutus.Model.{Account,Transaction}
+  alias Plutus.Common.Utilities
 
   require Logger
 
@@ -109,5 +110,11 @@ defmodule Plutus.Worker.TransactionWorker do
       account_id: account_id,
       pending: pending
     }
+  end
+
+  def adhoc_process_transactions() do
+    valid_accounts = Account.get_all_accounts() 
+    |> Utilities.filter_valid_accounts()
+    :ok = process_transactions(valid_accounts)
   end
 end

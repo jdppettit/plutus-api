@@ -36,7 +36,7 @@ defmodule PlutusWeb.ExpenseView do
     }
   end
 
-  def render("bad_request.json", message) do
+  def render("bad_request.json", %{message: message}) do
     %{
       message: message
     }

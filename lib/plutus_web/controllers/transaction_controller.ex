@@ -4,6 +4,7 @@ defmodule PlutusWeb.TransactionController do
 
   alias Plutus.Model.Transaction
   alias PlutusWeb.Params.{AccountId, TransactionId, StringDate}
+  alias Plutus.Worker.TransactionWorker
 
   defparams(
     get_all_params(%{
@@ -77,6 +78,18 @@ defmodule PlutusWeb.TransactionController do
         conn
         |> put_status(500)
         |> render("bad_request.json", message: "database error")  
+    end
+  end
+
+  def update_transactions(conn, _params) do
+    with :ok <- TransactionWorker.adhoc_process_transactions do
+      conn
+      |> render("update_transactions.json")
+    else
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "process transaction failed")
     end
   end
 end 

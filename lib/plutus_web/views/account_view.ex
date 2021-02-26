@@ -1,6 +1,12 @@
 defmodule PlutusWeb.AccountView do
   use PlutusWeb, :view
 
+  def render("update_balances.json", %{}) do
+    %{
+      message: "balances updated"
+    }
+  end
+
   def render("link_token.json", %{link_token: link_token}) do
     %{
       message: "link token created",
@@ -29,7 +35,7 @@ defmodule PlutusWeb.AccountView do
     }
   end
 
-  def render("bad_request.json", message) do
+  def render("bad_request.json", %{message: message}) do
     %{
       message: message
     }

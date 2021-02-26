@@ -3,6 +3,7 @@ defmodule Plutus.Worker.AccountWorker do
 
   alias Plutus.Model.{Account}
   alias Plutus.Common.Date, as: PDate
+  alias Plutus.Common.Utilities
 
   require Logger
 
@@ -24,7 +25,8 @@ defmodule Plutus.Worker.AccountWorker do
 
   def handle_info(:account_refresh, _) do
     Logger.info("#{__MODULE__}: Starting settlement now")
-    valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
+    valid_accounts = Account.get_all_accounts() 
+    |> Utilities.filter_valid_accounts()
     :ok = do_account_refresh(valid_accounts)
     Process.send_after(self(), :account_refresh, @interval)
     {:noreply, nil}
@@ -45,10 +47,9 @@ defmodule Plutus.Worker.AccountWorker do
     :ok
   end
 
-  def filter_valid_accounts(accounts) do
-    accounts
-    |> Enum.filter(fn account -> 
-      !is_nil(Map.get(account, :access_token, nil))
-    end)
+  def adhoc_refresh() do
+    valid_accounts = Account.get_all_accounts() 
+    |> Utilities.filter_valid_accounts()
+    :ok = do_account_refresh(valid_accounts)
   end
 end

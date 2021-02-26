@@ -1,6 +1,18 @@
 defmodule PlutusWeb.EventView do
   use PlutusWeb, :view
 
+  def render("settlement.json", %{}) do
+    %{
+      message: "settlement completed"
+    }
+  end
+
+  def render("match.json", %{}) do
+    %{
+      message: "match completed"
+    }
+  end
+
   def render("expense_created.json", %{event: event}) do
     %{
       message: "event created successfully",

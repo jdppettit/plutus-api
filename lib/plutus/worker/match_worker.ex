@@ -4,6 +4,7 @@ defmodule Plutus.Worker.MatchWorker do
   alias Plutus.Model.{Account,Income,Expense,Event, Transaction}
   alias Plutus.Types.Precompute
   alias Plutus.Common.Date, as: PDate
+  alias Plutus.Common.Utilities
 
   require Logger
 
@@ -25,7 +26,8 @@ defmodule Plutus.Worker.MatchWorker do
 
   def handle_info(:match, _) do
     Logger.info("#{__MODULE__}: Starting match now")
-    valid_accounts = Account.get_all_accounts() |> filter_valid_accounts()
+    valid_accounts = Account.get_all_accounts() 
+    |> Utilities.filter_valid_accounts()
     :ok = do_match(valid_accounts)
     Process.send_after(self(), :match, @interval)
     {:noreply, nil}
@@ -50,13 +52,6 @@ defmodule Plutus.Worker.MatchWorker do
     :ok
   end
 
-  def filter_valid_accounts(accounts) do
-    accounts
-    |> Enum.filter(fn account -> 
-      !is_nil(Map.get(account, :access_token, nil))
-    end)
-  end
-
   def match_expense_to_transaction(expenses, transactions) do
     expenses
     |> Enum.map(fn expense ->
@@ -70,5 +65,11 @@ defmodule Plutus.Worker.MatchWorker do
         end
       end)
     end)
+  end
+
+  def adhoc_match() do
+    valid_accounts = Account.get_all_accounts() 
+    |> Utilities.filter_valid_accounts()
+    :ok = do_match(valid_accounts)
   end
 end

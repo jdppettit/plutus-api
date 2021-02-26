@@ -1,6 +1,12 @@
 defmodule PlutusWeb.TransactionView do
   use PlutusWeb, :view
 
+  def render("update_transactions.json", %{}) do
+    %{
+      message: "transaction update completed"
+    }
+  end
+
   def render("transaction_created.json", %{transaction: transaction}) do
     %{
       message: "transaction created successfully",
@@ -38,7 +44,7 @@ defmodule PlutusWeb.TransactionView do
     }
   end
 
-  def render("bad_request.json", message) do
+  def render("bad_request.json", %{message: message}) do
     %{
       message: message
     }
