@@ -61,7 +61,17 @@ defmodule Plutus.Model.Income do
       model ->
         {:ok, model}
     end
-  end 
+  end
+
+  def delete_by_id(id) do
+    model = get_by_id(id)
+    case Repo.delete(model) do
+      {:ok, _struct} ->
+        {:ok, nil}
+      {:error, _} ->
+        {:error, :database_error}
+    end
+  end
   
   def insert(changeset) do
     case Repo.insert(changeset) do

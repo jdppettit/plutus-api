@@ -65,7 +65,14 @@ defmodule Plutus.Model.Event do
       model ->
         {:ok, model}
     end
-  end 
+  end
+
+  def get_by_parent_id(id) do
+    query = from(event in __MODULE__,
+      where: event.parent_id == ^id
+    )
+    {:ok, Plutus.Repo.all(query)}
+  end
   
   def insert(changeset) do
     case Repo.insert(changeset) do
@@ -193,5 +200,11 @@ defmodule Plutus.Model.Event do
   def set_settled(model) do
     {:ok, changeset} = __MODULE__.create_changeset(model, %{settled: true})
     {:ok, model} = __MODULE__.update(changeset) 
+  end
+
+  def delete_by_parent_id(id) do
+    models = get_by_parent_id(id)
+    Repo.delete_all(models) 
+    {:ok, nil}
   end
 end

@@ -1,6 +1,13 @@
 defmodule PlutusWeb.IncomeView do
   use PlutusWeb, :view
 
+  def render("deleted.json", %{id: id}) do
+    %{
+      message: "income deleted successfully",
+      income: %{id: id} 
+    }
+  end
+
   def render("income_created.json", %{income: income}) do
     %{
       message: "income created successfully",

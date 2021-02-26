@@ -2,7 +2,7 @@ defmodule PlutusWeb.IncomeController do
   use PlutusWeb, :controller
   use Params
 
-  alias Plutus.Model.Income
+  alias Plutus.Model.{Income,Event}
   alias Plutus.Worker.PrecomputeWorker
   alias PlutusWeb.Params.{AccountId, IncomeId}
 
@@ -86,5 +86,36 @@ defmodule PlutusWeb.IncomeController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")
     end
+  end
+
+  defparams(
+    delete_params(%{
+      account_id!: AccountId,
+      id!: IncomeId
+    })
+  )
+
+  def delete(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, _} <- Income.delete_by_id(parsed_params.id),
+         {:ok, _} <- Event.delete_by_parent_id(parsed_params.id),
+          :ok <- PrecomputeWorker.adhoc_precompute do
+      conn
+      |> render("deleted.json", id: parsed_params.id)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "unexpected error")    
+    end               
   end
 end 

@@ -59,7 +59,7 @@ defmodule Plutus.Worker.PrecomputeWorker do
           type: :income,
           precompute_date: precompute_date,
           anticipated_date: get_anticipated_date(income, index),
-          parent_id: nil,
+          parent_id: income.id,
           account_id: income.account_id
         })
         process_expense(model)
