@@ -12,7 +12,7 @@ defmodule PlutusWeb.AccountController do
       client_name: "Plutus Money",
       language: "en",
       country_codes: ["US"],
-      products: ["auth", "transactions"],
+      products: ["transactions"],
       user: %{
         client_user_id: "plutus_money"
       }
@@ -36,7 +36,7 @@ defmodule PlutusWeb.AccountController do
   def create(conn, raw_params) do
     with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params) |> IO.inspect},
          parsed_params <- Params.to_map(params_changeset),
-         {:ok, %{access_token: access_token} = resp} <- Plaid.Item.exchange_public_token(%{public_token: raw_params["public_token"]}),
+         {:ok, %{access_token: access_token} = resp} <- Plaid.Item.exchange_public_token(%{public_token: raw_params["public_token"]}) |> IO.inspect,
          {:ok, plaid_info} <- Plaid.Accounts.get_balance(%{access_token: access_token, options: %{account_ids: [raw_params["remote_id"]]}}),
          {:ok, parsed_params} <- {:ok, update_params_with_balance(parsed_params, plaid_info)},
          {:ok, parsed_params} <- {:ok, Map.put(parsed_params, :access_token, access_token)},
@@ -53,6 +53,35 @@ defmodule PlutusWeb.AccountController do
         conn
         |> put_status(500)
         |> render("bad_request.json", message: "database error")
+      {:error, %Plaid.Error{error_code: "ITEM_LOGIN_REQUIRED"} = error} ->
+        Logger.error("#{__MODULE__}: Got Plaid error indicating update flow is required for account")
+        Logger.error("#{__MODULE__}: #{inspect(error)}")
+        conn
+        |> put_status(200)
+        |> render("account_update_required.json", %{})
+    end
+  end
+
+  defparams(
+    exchange_params(%{
+      remote_id!: :string,
+      plubic_token!: :string
+    })
+  )
+
+  def exchange(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, exchange_params(raw_params) |> IO.inspect},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, changeset} <- Account.create_changeset(parsed_params),
+         {:ok, model} <- Account.insert(changeset) 
+    do
+      conn
+      |> render("exchanged.json", model: model)
+    else
+      _ ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
     end
   end
 

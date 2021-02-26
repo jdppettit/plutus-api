@@ -62,3 +62,11 @@ config :plutus, Plutus.Repo,
   database: "plutus_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :logger, backends: [:console, Gelfx]
+
+config :logger, Gelfx,
+  host: "graylog.pettit.home",
+  hostname: "plutus-api-development",
+  protocol: :tcp,
+  level: :debug

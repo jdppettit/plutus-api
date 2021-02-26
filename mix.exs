@@ -45,7 +45,8 @@ end
       {:plaid, "~> 2.0", hex: :plaid_elixir},
       {:poison, "~> 4.0", override: true},
       {:timex, "~> 3.6"},
-      {:holidays, "~> 0.2.4"}
+      {:holidays, "~> 0.2.4"},
+      {:gelfx, "~> 1.0"}
     ]
   end
 

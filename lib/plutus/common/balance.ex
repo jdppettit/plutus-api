@@ -4,17 +4,21 @@ defmodule Plutus.Common.Balance do
 
   def compute_balance(%{balance: balance, id: id} = account) do
     {:ok, current_income} = Event.get_current_income_event(id)
-    expenses = Event.get_by_window(%{
-      account_id: id,
-      window_start: PDate.get_beginning_of_month(),
-      window_end: current_income.anticipated_date,
-      type: "expense"
-    })
-    computed_balance = expenses
-    |> Enum.reduce(balance, fn e, acc -> 
-      acc - e.amount
-    end)
-    {computed_balance, expenses}
+    if is_nil(current_income) do
+      {balance, []}
+    else
+      expenses = Event.get_by_window(%{
+        account_id: id,
+        window_start: PDate.get_beginning_of_month(),
+        window_end: current_income.anticipated_date,
+        type: "expense"
+      })
+      computed_balance = expenses
+      |> Enum.reduce(balance, fn e, acc -> 
+        acc - e.amount
+      end)
+      {computed_balance, expenses}
+    end
   end
 
   def add_computed_values(model) do

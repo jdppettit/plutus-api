@@ -12,11 +12,6 @@ config :plutus, PlutusWeb.Endpoint,
   ],
   http: [protocol_options: [max_request_line_length: 8192, max_header_value_length: 8192]]
 
-config :logger, level: :info
-
-config :logger,
-  backends: [:console]
-
 config :plutus, Plutus.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "plutus_prod",
@@ -26,6 +21,14 @@ config :plutus, Plutus.Repo,
   pool_size: 5,
   port: 25060,
   ssl: true
+
+config :logger, backends: [:console, Gelfx]
+
+config :logger, Gelfx,
+  host: "graylog.pettit.home",
+  hostname: "plutus-api-production",
+  level: :info
+  
 
 config :plutus, PlutusWeb.Endpoint,
   secret_key_base: "qwJjb8u4Ypi90spfvkYxp4I5l4javEs/GUTavUDZSOipUfhA+Xxpqcijr7fqsWX4"

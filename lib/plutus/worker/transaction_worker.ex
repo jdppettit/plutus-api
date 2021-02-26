@@ -7,6 +7,7 @@ defmodule Plutus.Worker.TransactionWorker do
 
   @minus_days -30
   @interval 86_400_000 # 1 day
+  @fetch_interval 1_000
 
   def start_link() do
     GenServer.start_link(
@@ -59,8 +60,9 @@ defmodule Plutus.Worker.TransactionWorker do
     
     new_offset = offset+100
 
-    if tx_data.total_transactions == offset do
-      fetch_transactions(account, count + 100, offset + 100)
+    if tx_data.total_transactions >= count do
+      :timer.sleep(@fetch_interval)
+      fetch_transactions(account, count, offset + 100)
     end
   end
 
@@ -83,6 +85,7 @@ defmodule Plutus.Worker.TransactionWorker do
   end
 
   def persist_transactions(transactions, account_id) do
+    Logger.info("#{__MODULE__}: Persisting transactions")
     transactions
     |> Enum.map(fn tx -> 
       formatted_tx = format_transaction(tx, account_id)

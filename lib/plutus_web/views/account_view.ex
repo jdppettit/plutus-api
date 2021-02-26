@@ -22,6 +22,13 @@ defmodule PlutusWeb.AccountView do
     }
   end
 
+  def render("account_update_required.json", _) do
+    %{
+      message: "plaid update required",
+      type: "UPDATE_REQUIRED"
+    }
+  end
+
   def render("bad_request.json", message) do
     %{
       message: message
