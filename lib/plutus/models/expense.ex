@@ -11,6 +11,7 @@ defmodule Plutus.Model.Expense do
   schema "expense" do
     field :amount, :float
     field :description, :string
+    field :transaction_description, :string
 
     timestamps()
 
@@ -22,7 +23,8 @@ defmodule Plutus.Model.Expense do
     |> cast(attrs, __schema__(:fields))
     |> validate_required([
       :amount,
-      :description
+      :description,
+      :transaction_description
     ])
   end
 

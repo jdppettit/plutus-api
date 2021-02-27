@@ -16,6 +16,7 @@ defmodule PlutusWeb.ExpenseView do
         income_id: expense.income_id,
         description: expense.description,
         amount: expense.amount,
+        transaction_description: expense.transaction_description
       }
     end)
     %{
@@ -32,6 +33,7 @@ defmodule PlutusWeb.ExpenseView do
         income_id: expense.income_id,
         description: expense.description,
         amount: expense.amount,
+        transaction_description: expense.transaction_description
       }
     }
   end

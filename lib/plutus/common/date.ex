@@ -70,6 +70,14 @@ defmodule Plutus.Common.Date do
     end
   end
 
+  def shift_to_earliest_business_day(date) do
+    if is_business_day?(date) and not is_bank_holiday?(date) do
+      date
+    else
+      find_next_earliest_business_day(date)
+    end 
+  end
+
   def is_business_day?(date) do
     day_of_week = Date.day_of_week(date)
     Enum.member?(@week_days, day_of_week)

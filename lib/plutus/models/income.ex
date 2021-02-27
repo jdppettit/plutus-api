@@ -64,7 +64,7 @@ defmodule Plutus.Model.Income do
   end
 
   def delete_by_id(id) do
-    model = get_by_id(id)
+    {:ok, model} = get_by_id(id)
     case Repo.delete(model) do
       {:ok, _struct} ->
         {:ok, nil}

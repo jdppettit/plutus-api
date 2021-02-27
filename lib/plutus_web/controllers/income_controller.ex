@@ -99,7 +99,7 @@ defmodule PlutusWeb.IncomeController do
     with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
          {:ok, _} <- Income.delete_by_id(parsed_params.id),
-         {:ok, _} <- Event.delete_by_parent_id(parsed_params.id),
+         {:ok, _} <- Event.delete_by_parent_id(parsed_params.id, "income"),
           :ok <- PrecomputeWorker.adhoc_precompute do
       conn
       |> render("deleted.json", id: parsed_params.id)

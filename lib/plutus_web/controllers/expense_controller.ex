@@ -13,7 +13,8 @@ defmodule PlutusWeb.ExpenseController do
       account_id!: AccountId,
       income_id!: IncomeId,
       amount: :float,
-      description!: :string
+      description!: :string,
+      transaction_description: :string
     })
   )
 

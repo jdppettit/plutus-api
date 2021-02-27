@@ -69,7 +69,8 @@ defmodule Plutus.Model.Event do
 
   def get_by_parent_id(id) do
     query = from(event in __MODULE__,
-      where: event.parent_id == ^id
+      where: event.parent_id == ^id,
+      where: event.type == ^"income"
     )
     {:ok, Plutus.Repo.all(query)}
   end
@@ -202,9 +203,12 @@ defmodule Plutus.Model.Event do
     {:ok, model} = __MODULE__.update(changeset) 
   end
 
-  def delete_by_parent_id(id) do
-    models = get_by_parent_id(id)
-    Repo.delete_all(models) 
+  def delete_by_parent_id(id, type) do
+    query = from(event in __MODULE__,
+      where: event.parent_id == ^id,
+      where: event.type == ^type
+    )
+    Repo.delete_all(query) 
     {:ok, nil}
   end
 end

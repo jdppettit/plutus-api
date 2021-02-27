@@ -91,6 +91,7 @@ defmodule Plutus.Worker.PrecomputeWorker do
       date = PDate.assemble_date_from_day_of_month(1)
       |> PDate.shift_months(index)
       |> PDate.end_of_month
+      |> PDate.shift_to_earliest_business_day
     else
       date = PDate.assemble_date_from_day_of_month(income.day_of_month)
       |> PDate.shift_months(index)

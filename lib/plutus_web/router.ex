@@ -22,6 +22,7 @@ defmodule PlutusWeb.Router do
     post "/account/:account_id/income", IncomeController, :create
     get "/account/:account_id/income", IncomeController, :get_all
     get "/account/:account_id/income/:id", IncomeController, :get
+    delete "/account/:account_id/income/:id", IncomeController, :delete
 
     post "/account/:account_id/income/:income_id/expense", ExpenseController, :create
     get "/account/:account_id/income/:income_id/expense", ExpenseController, :get_all
