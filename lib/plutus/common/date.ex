@@ -82,4 +82,8 @@ defmodule Plutus.Common.Date do
     day_of_week = Date.day_of_week(date)
     Enum.member?(@week_days, day_of_week)
   end
+
+  def parse_date(date) do
+    Timex.parse(date, "{YYYY}-{0M}-{0D}")
+  end
 end

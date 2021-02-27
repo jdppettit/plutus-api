@@ -51,19 +51,40 @@ defmodule Plutus.Worker.PrecomputeWorker do
     |> Enum.map(fn income -> 
       # for each income instance, make an event for each month
       # in precompute window
-      Enum.each(0..@precompute_months, fn index -> 
-        {:ok, model} = Event.maybe_insert(%{
-          amount: income.amount,
-          description: income.description,
-          target_id: income.id,
-          type: :income,
-          precompute_date: precompute_date,
-          anticipated_date: get_anticipated_date(income, index),
-          parent_id: income.id,
-          account_id: income.account_id
-        })
-        process_expense(model)
-      end)
+      if income.recurring == true do
+        Logger.info("#{__MODULE__}: Income #{inspect(income.id)} is recurring, precomputing out")
+        Enum.each(0..@precompute_months, fn index -> 
+          {:ok, model} = Event.maybe_insert(%{
+            amount: income.amount,
+            description: income.description,
+            target_id: income.id,
+            type: :income,
+            precompute_date: precompute_date,
+            anticipated_date: get_anticipated_date(income, index),
+            parent_id: income.id,
+            account_id: income.account_id
+          })
+          process_expense(model)
+          end)
+        else
+          Logger.info("#{__MODULE__}: Income #{inspect(income.id)} is not recurring, examining further")
+          if in_same_month?(income) do
+            Logger.info("#{__MODULE__}: Income #{inspect(income.id)} is not recurring, but precomputing for expected month")
+            {:ok, model} = Event.maybe_insert(%{
+              amount: income.amount,
+              description: income.description,
+              target_id: income.id,
+              type: :income,
+              precompute_date: precompute_date,
+              anticipated_date: get_anticipated_date(income, 0),
+              parent_id: income.id,
+              account_id: income.account_id
+            })
+            process_expense(model)
+          else
+            Logger.info("#{__MODULE__}: Income #{inspect(income.id)} is not recurring and precomputing for unexpected month, skipping")
+          end
+        end
     end)
   end
 
@@ -71,16 +92,36 @@ defmodule Plutus.Worker.PrecomputeWorker do
     {:ok, expenses} = Expense.get_all_expenses_for_income(id)
     expenses
     |> Enum.map(fn expense ->
-        {:ok, model} = Event.maybe_insert(%{
-          amount: expense.amount,
-          description: expense.description,
-          target_id: expense.id,
-          type: :expense,
-          precompute_date: precompute_date,
-          anticipated_date: anticipated_date,
-          parent_id: parent_id,
-          account_id: account_id
-        })
+        if expense.recurring == true do
+          Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is recurring, precomputing out")
+          {:ok, model} = Event.maybe_insert(%{
+            amount: expense.amount,
+            description: expense.description,
+            target_id: expense.id,
+            type: :expense,
+            precompute_date: precompute_date,
+            anticipated_date: anticipated_date,
+            parent_id: parent_id,
+            account_id: account_id
+          })
+        else
+          Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring, examining further")
+          if in_same_month?(expense) do
+            Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring, but precomputing for expected month")
+            {:ok, model} = Event.maybe_insert(%{
+              amount: expense.amount,
+              description: expense.description,
+              target_id: expense.id,
+              type: :expense,
+              precompute_date: precompute_date,
+              anticipated_date: anticipated_date,
+              parent_id: parent_id,
+              account_id: account_id
+            })            
+          else
+            Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring and precomputing for unexpected month, skipping")
+          end
+        end
       end)
   end
 
@@ -111,5 +152,12 @@ defmodule Plutus.Worker.PrecomputeWorker do
     valid_accounts = Account.get_all_accounts() 
     |> Utilities.filter_valid_accounts()
     :ok = do_precompute(valid_accounts)  
+  end
+
+  def in_same_month?(%Expense{month: expense_month} = expense) do
+    {_year, current_month, _day} = PDate.get_current_date
+    |> PDate.format_date()
+
+    expense_month == current_month
   end
 end

@@ -12,6 +12,8 @@ defmodule Plutus.Model.Expense do
     field :amount, :float
     field :description, :string
     field :transaction_description, :string
+    field :recurring, :boolean
+    field :month, :integer
 
     timestamps()
 

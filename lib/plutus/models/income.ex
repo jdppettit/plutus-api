@@ -15,6 +15,7 @@ defmodule Plutus.Model.Income do
     field :day_of_week, :integer
     field :amount, :float
     field :description, :string
+    field :month, :integer
 
     timestamps()
 

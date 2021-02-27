@@ -4,7 +4,7 @@ defmodule PlutusWeb.ExpenseController do
 
   alias Plutus.Model.Expense
   alias Plutus.Worker.PrecomputeWorker
-  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId}
+  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, IntegerMonth}
 
   require Logger
 
@@ -14,7 +14,9 @@ defmodule PlutusWeb.ExpenseController do
       income_id!: IncomeId,
       amount: :float,
       description!: :string,
-      transaction_description: :string
+      transaction_description: :string,
+      month: IntegerMonth,
+      recurring!: :boolean
     })
   )
 

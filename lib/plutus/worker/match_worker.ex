@@ -56,12 +56,21 @@ defmodule Plutus.Worker.MatchWorker do
     expenses
     |> Enum.map(fn expense ->
       transactions
-      |> Enum.map(fn transaction -> 
-        if expense.amount == transaction.amount && 
-           String.downcase(expense.description) == String.downcase(transaction.description) 
-        do
-          Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
-          Event.set_settled(expense)
+      |> Enum.map(fn transaction ->
+        if not is_nil(Map.get(expense, :transaction_description, nil)) do
+          if expense.amount == transaction.amount && 
+             String.downcase(expense.transaction_description) == String.downcase(transaction.description)
+          do
+            Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
+            Event.set_settled(expense)
+          end
+        else
+          if expense.amount == transaction.amount && 
+            String.downcase(expense.description) == String.downcase(transaction.description) 
+          do
+            Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
+            Event.set_settled(expense)
+          end
         end
       end)
     end)

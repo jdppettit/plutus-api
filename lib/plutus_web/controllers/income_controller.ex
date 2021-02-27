@@ -2,9 +2,9 @@ defmodule PlutusWeb.IncomeController do
   use PlutusWeb, :controller
   use Params
 
-  alias Plutus.Model.{Income,Event}
+  alias Plutus.Model.{Income, Event}
   alias Plutus.Worker.PrecomputeWorker
-  alias PlutusWeb.Params.{AccountId, IncomeId}
+  alias PlutusWeb.Params.{AccountId, IncomeId, IntegerMonth}
 
   require Logger
 
@@ -15,7 +15,8 @@ defmodule PlutusWeb.IncomeController do
       day_of_month: :integer,
       day_of_week: :integer,
       amount: :float,
-      description!: :string
+      description!: :string,
+      month: IntegerMonth
     })
   )
 
