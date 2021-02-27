@@ -20,6 +20,8 @@ defmodule Plutus.Model.Event do
     field :description, :string
     field :parent_id, :integer
     field :account_id, :integer
+    field :settled_by, :integer
+    field :transaction_description, :string
 
     timestamps()
   end
@@ -204,8 +206,8 @@ defmodule Plutus.Model.Event do
     {:ok, Plutus.Repo.all(query)}
   end
 
-  def set_settled(model) do
-    {:ok, changeset} = __MODULE__.create_changeset(model, %{settled: true})
+  def set_settled(model, tx_id) do
+    {:ok, changeset} = __MODULE__.create_changeset(model, %{settled: true, settled_by: tx_id})
     {:ok, model} = __MODULE__.update(changeset) 
   end
 

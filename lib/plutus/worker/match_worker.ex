@@ -62,14 +62,19 @@ defmodule Plutus.Worker.MatchWorker do
              String.downcase(expense.transaction_description) == String.downcase(transaction.description)
           do
             Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
-            Event.set_settled(expense)
+            Event.set_settled(expense, transaction.id)
           end
         else
           if expense.amount == transaction.amount && 
-            String.downcase(expense.description) == String.downcase(transaction.description) 
+            String.downcase(expense.transaction_description) == String.downcase(transaction.description) 
           do
             Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
-            Event.set_settled(expense)
+            Event.set_settled(expense, transaction.id)
+          else
+            if not is_nil(Map.get(expense, :transaction_description, nil)) && String.contains?(transaction.description, expense.transaction_description) do
+              Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
+              Event.set_settled(expense, transaction.id)
+            end
           end
         end
       end)

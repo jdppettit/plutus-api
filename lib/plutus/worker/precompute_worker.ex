@@ -102,7 +102,8 @@ defmodule Plutus.Worker.PrecomputeWorker do
             precompute_date: precompute_date,
             anticipated_date: anticipated_date,
             parent_id: parent_id,
-            account_id: account_id
+            account_id: account_id,
+            transaction_description: expense.transaction_description
           })
         else
           Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring, examining further")
@@ -116,7 +117,8 @@ defmodule Plutus.Worker.PrecomputeWorker do
               precompute_date: precompute_date,
               anticipated_date: anticipated_date,
               parent_id: parent_id,
-              account_id: account_id
+              account_id: account_id,
+              transaction_description: expense.transaction_description
             })            
           else
             Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring and precomputing for unexpected month, skipping")
