@@ -4,7 +4,7 @@ defmodule PlutusWeb.EventController do
 
   alias Plutus.Model.{Event,Account}
   alias Plutus.Worker.{PrecomputeWorker,SettlementWorker,MatchWorker}
-  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate}
+  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate, EventId}
 
   require Logger
 
@@ -92,5 +92,33 @@ defmodule PlutusWeb.EventController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")  
     end 
+  end
+
+  defparams(
+    update_params(%{
+      account_id!: AccountId,
+      id!: EventId,
+      settled: :boolean,
+      amount: :float,
+      description: :string
+    })
+  )
+
+  def update(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, update_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, model} <- Event.update_event(parsed_params) do
+      conn
+      |> render("event_updated.json", event: model)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
+    end
   end
 end 

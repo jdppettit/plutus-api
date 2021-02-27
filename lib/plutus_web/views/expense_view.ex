@@ -1,6 +1,13 @@
 defmodule PlutusWeb.ExpenseView do
   use PlutusWeb, :view
 
+  def render("expense_updated.json", %{expense: expense}) do
+    %{
+      message: "expense updated successfully",
+      expense: %{id: expense.id}
+    }
+  end
+
   def render("expense_created.json", %{expense: expense}) do
     %{
       message: "expense created successfully",
