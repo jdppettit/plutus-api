@@ -154,7 +154,14 @@ defmodule Plutus.Worker.PrecomputeWorker do
     :ok = do_precompute(valid_accounts)  
   end
 
-  def in_same_month?(%Expense{month: expense_month} = expense) do
+  def in_same_month?(%Income{month: income_month} = _income) do
+    {_year, current_month, _day} = PDate.get_current_date
+    |> PDate.format_date()
+
+    income_month == current_month   
+  end
+
+  def in_same_month?(%Expense{month: expense_month} = _expense) do
     {_year, current_month, _day} = PDate.get_current_date
     |> PDate.format_date()
 
