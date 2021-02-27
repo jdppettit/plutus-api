@@ -4,7 +4,7 @@ defmodule PlutusWeb.AccountController do
 
   alias Plutus.Model.Account
   alias Plutus.Common.Balance
-  alias Plutus.Worker.AccountWorker
+  alias Plutus.Worker.{AccountWorker,TransactionWorker}
 
   require Logger
 
@@ -42,7 +42,8 @@ defmodule PlutusWeb.AccountController do
          {:ok, parsed_params} <- {:ok, update_params_with_balance(parsed_params, plaid_info)},
          {:ok, parsed_params} <- {:ok, Map.put(parsed_params, :access_token, access_token)},
          {:ok, changeset} <- Account.create_changeset(parsed_params),
-         {:ok, model} <- Account.insert(changeset) do
+         {:ok, model} <- Account.insert(changeset),
+         :ok <- TransactionWorker.adhoc_process_transactions() do
       conn
       |> render("account_created.json", account: model) 
     else
