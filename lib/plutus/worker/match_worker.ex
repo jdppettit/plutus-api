@@ -40,13 +40,18 @@ defmodule Plutus.Worker.MatchWorker do
       {:ok, current_income} = Event.get_current_income_event(account.id)
       if not is_nil(current_income) do
         {:ok, expenses_for_income} = Event.get_expenses_for_income(current_income.id)
+        Logger.info("#{__MODULE__}: Current income was not nil for account #{account.id}")
+        Logger.info("#{__MODULE__}: Got #{length(expenses_for_income)} related expenses")
         transactions = Transaction.get_by_window(%{
             account_id: current_income.account_id, 
             window_start: PDate.get_beginning_of_month(), 
             window_end: PDate.get_current_date()
           }
         )
+        Logger.info("#{__MODULE__}: Got #{length(transactions)} related transactions")
         match_expense_to_transaction(expenses_for_income, transactions)
+      else
+        Logger.warn("#{__MODULE__}: Current income was returned as nil for #{account.id}")
       end
     end)
     :ok
@@ -55,7 +60,7 @@ defmodule Plutus.Worker.MatchWorker do
   def match_expense_to_transaction(expenses, transactions) do
     expenses
     |> Enum.map(fn expense ->
-      transactions
+      transactions 
       |> Enum.map(fn transaction ->
         if not is_nil(Map.get(expense, :transaction_description, nil)) do
           if expense.amount == transaction.amount && 
@@ -63,18 +68,18 @@ defmodule Plutus.Worker.MatchWorker do
           do
             Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
             Event.set_settled(expense, transaction.id)
-          end
-        else
-          if expense.amount == transaction.amount && 
-            String.downcase(expense.transaction_description) == String.downcase(transaction.description) 
-          do
-            Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
-            Event.set_settled(expense, transaction.id)
           else
-            if not is_nil(Map.get(expense, :transaction_description, nil)) && String.contains?(transaction.description, expense.transaction_description) do
+            if expense.amount == transaction.amount && String.contains?(transaction.description, expense.transaction_description) do
               Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
               Event.set_settled(expense, transaction.id)
             end
+          end
+        else
+          if expense.amount == transaction.amount && 
+            String.downcase(expense.description) == String.downcase(transaction.description) 
+          do
+            Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
+            Event.set_settled(expense, transaction.id)
           end
         end
       end)
