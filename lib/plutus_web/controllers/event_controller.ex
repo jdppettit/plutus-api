@@ -3,7 +3,7 @@ defmodule PlutusWeb.EventController do
   use Params
 
   alias Plutus.Model.{Event,Account}
-  alias Plutus.Worker.{PrecomputeWorker,SettlementWorker,MatchWorker}
+  alias Plutus.Worker.{PrecomputeWorker,SettlementWorker,MatchWorker,AccountWorker,TransactionWorker}
   alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate, EventId}
 
   require Logger
@@ -120,5 +120,21 @@ defmodule PlutusWeb.EventController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")  
     end
+  end
+
+  def refresh_data(conn, _params) do
+    with :ok <- AccountWorker.adhoc_refresh,
+         :ok <- TransactionWorker.adhoc_process_transactions,
+         :ok <- MatchWorker.adhoc_match,
+         :ok <- SettlementWorker.adhoc_settlement
+    do
+      conn
+      |> render("data_refresh.json")
+    else
+      _ ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "refresh failed") 
+    end    
   end
 end 

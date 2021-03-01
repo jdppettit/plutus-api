@@ -1,6 +1,19 @@
 defmodule PlutusWeb.EventView do
   use PlutusWeb, :view
 
+  def render("event_updated.json", %{event: event}) do
+    %{
+      message: "event updated successfully",
+      event: %{id: event.id}
+    }
+  end
+
+  def render("data_refresh.json", %{}) do
+    %{
+      message: "data refreshed"
+    }
+  end
+
   def render("settlement.json", %{}) do
     %{
       message: "settlement completed"

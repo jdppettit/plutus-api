@@ -173,7 +173,6 @@ defmodule Plutus.Model.Event do
     beginning_of_month = PDate.get_beginning_of_month()
     query = from(event in __MODULE__,
       where: event.account_id == ^account_id,
-      where: event.anticipated_date >= ^beginning_of_month,
       where: event.anticipated_date <= ^current_date,
       where: event.type == ^"income",
       where: is_nil(event.settled)

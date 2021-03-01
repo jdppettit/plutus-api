@@ -2,17 +2,15 @@ defmodule Plutus.Common.Balance do
   alias Plutus.Model.Event
   alias Plutus.Common.Date, as: PDate
 
+  require Logger
+
   def compute_balance(%{balance: balance, id: id} = account) do
     {:ok, current_income} = Event.get_current_income_event(id)
     if is_nil(current_income) do
+      Logger.warn("#{__MODULE__}: Found no current income when calculating balance for #{id}")
       {balance, []}
     else
-      expenses = Event.get_by_window(%{
-        account_id: id,
-        window_start: PDate.get_beginning_of_month(),
-        window_end: current_income.anticipated_date,
-        type: "expense"
-      })
+      {:ok, expenses} = Event.get_expenses_for_income(current_income.id)
       computed_balance = expenses
       |> Enum.reduce(balance, fn e, acc -> 
         acc - e.amount

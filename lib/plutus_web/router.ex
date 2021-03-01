@@ -37,5 +37,6 @@ defmodule PlutusWeb.Router do
     get "/settlement", EventController, :settlement
     get "/update_transactions", TransactionController, :update_transactions
     get "/match", EventController, :match
+    get "/refresh_data", EventController, :refresh_data
   end
 end
