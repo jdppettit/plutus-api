@@ -69,7 +69,10 @@ defmodule Plutus.Worker.MatchWorker do
             Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
             Event.set_settled(expense, transaction.id)
           else
-            if expense.amount == transaction.amount && String.contains?(transaction.description, expense.transaction_description) do
+            if expense.amount == transaction.amount && 
+               String.contains?(transaction.description, expense.transaction_description) || 
+               String.contains?(expense.transaction_description, transaction.description) 
+            do
               Logger.info("#{__MODULE__}: Setting expense #{expense.id} to settled based on transaction #{transaction.id}")
               Event.set_settled(expense, transaction.id)
             end
