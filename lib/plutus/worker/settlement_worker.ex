@@ -42,7 +42,7 @@ defmodule Plutus.Worker.SettlementWorker do
       |> Enum.map(fn {event, index} -> 
         if index !== 0 do
           Logger.info("#{__MODULE__}: Settling income #{event.id}")
-          Event.set_settled(event)
+          Event.set_settled(event, nil)
         end
       end)
     end)

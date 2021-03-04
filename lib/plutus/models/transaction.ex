@@ -15,6 +15,7 @@ defmodule Plutus.Model.Transaction do
     field :pending, :boolean
     field :date, :date
     field :remote_id, :string
+    field :category_id, :integer
 
     timestamps()
 
@@ -116,5 +117,19 @@ defmodule Plutus.Model.Transaction do
       order_by: [asc: event.date]
     )
     Plutus.Repo.all(query)
+  end
+
+  def get_by_remote_id(remote_id) do
+  IO.inspect(remote_id, label: "get_by_remote_id")
+    case Repo.get_by(__MODULE__, remote_id: remote_id) do
+      nil ->
+        {:error, :not_found}
+      model ->
+        {:ok, model}
+    end
+  end
+
+  def delete(model) do
+    Repo.delete(model)
   end
 end

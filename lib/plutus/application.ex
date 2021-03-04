@@ -36,7 +36,9 @@ defmodule Plutus.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Plutus.Supervisor]
     Holidays.Definitions.Nyse.init() |> IO.inspect(label: "ret from holidays")
-    Supervisor.start_link(children, opts)
+    {:ok, pid} = Supervisor.start_link(children, opts) |> IO.inspect(label: "expected")
+    Plutus.Plaid.Categories.seed_categories()
+    {:ok, pid}
   end
 
   # Tell Phoenix to update the endpoint configuration

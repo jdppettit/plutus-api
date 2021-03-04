@@ -89,6 +89,11 @@ defmodule Plutus.Worker.TransactionWorker do
     Logger.info("#{__MODULE__}: Persisting transactions")
     transactions
     |> Enum.map(fn tx -> 
+      # This should happen first otherwise our uniqueness check will prevent the non-pending transaction
+      # from being persisted
+
+      handle_pending_transaction(tx)
+    
       formatted_tx = format_transaction(tx, account_id)
       {:ok, changeset} = Transaction.guess_and_create_changeset(formatted_tx)
       Plutus.Repo.insert_or_update(changeset)
@@ -100,7 +105,8 @@ defmodule Plutus.Worker.TransactionWorker do
     transaction_id: transaction_id,
     date: date,
     name: name,
-    pending: pending
+    pending: pending,
+    category_id: category_id
   }, account_id) do
     %{
       description: name,
@@ -108,8 +114,24 @@ defmodule Plutus.Worker.TransactionWorker do
       date: date,
       remote_id: transaction_id,
       account_id: account_id,
-      pending: pending
+      pending: pending,
+      category_id: category_id
     }
+  end
+
+  def handle_pending_transaction(%{pending_transaction_id: pending_tx_id} = transaction) when not is_nil(pending_tx_id) do
+    IO.inspect(pending_tx_id)
+    case Transaction.get_by_remote_id(pending_tx_id) do
+      {:ok, transaction} ->
+        Logger.info("#{__MODULE__}: Transaction #{inspect(transaction.id)} had pending_transaction_id #{inspect(pending_tx_id)} deleting old tx with that remote_id")
+        Transaction.delete(transaction)
+      {_, _} ->
+        Logger.error("#{__MODULE__}: Transaction had pending_transaction_id #{inspect(pending_tx_id)} but we couldn't find a tx with that remote_id")
+    end
+  end
+
+  def handle_pending_transaction(_transaction) do
+    Logger.debug("#{__MODULE__}: Looked at transaction with no pending transaction id")
   end
 
   def adhoc_process_transactions() do
