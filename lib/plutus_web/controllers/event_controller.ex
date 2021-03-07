@@ -13,7 +13,7 @@ defmodule PlutusWeb.EventController do
       account_id!: AccountId,
       window_start!: StringDate,
       window_end!: StringDate,
-      include_settled: :boolean
+      include_settled: [field: :boolean, default: true]
     })
   )
 
