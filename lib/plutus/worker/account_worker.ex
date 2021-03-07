@@ -35,14 +35,18 @@ defmodule Plutus.Worker.AccountWorker do
   def do_account_refresh(accounts) do
     accounts
     |> Enum.map(fn account -> 
-      {:ok, plaid_data} = Plaid.Accounts.get_balance(%{
+      case Plaid.Accounts.get_balance(%{
         access_token: account.access_token, 
         options: %{account_ids: [account.remote_id]}}
-      )
-      [first_account | _] = plaid_data.accounts
-      balance = first_account.balances.available
-      Logger.info("#{__MODULE__}: Updating balance for account #{account.id} with #{balance}")
-      Account.set_balance(account, balance)
+      ) do
+        {:ok, plaid_data} -> 
+          [first_account | _] = plaid_data.accounts
+          balance = first_account.balances.available
+          Logger.info("#{__MODULE__}: Updating balance for account #{account.id} with #{balance}")
+          Account.set_balance(account, balance)
+        {:error, error} ->
+          Logger.error("#{__MODULE__}: Received error attempting to update acocunt #{account.id}: #{inspect(error)}")
+      end
     end)
     :ok
   end
