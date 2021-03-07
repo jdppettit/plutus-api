@@ -157,12 +157,32 @@ defmodule Plutus.Model.Event do
     Plutus.Repo.all(query)
   end
 
-  def get_by_window(%{account_id: account_id, window_start: window_start, window_end: window_end}) do
+  def get_by_window(%{account_id: account_id, window_start: window_start, window_end: window_end, include_settled: true}) do
+    query = from(event in __MODULE__,
+      where: event.account_id == ^account_id,
+      where: event.anticipated_date >= ^window_start,
+      where: event.anticipated_date <= ^window_end,
+      order_by: [asc: event.anticipated_date]
+    )
+    Plutus.Repo.all(query)
+  end
+
+  def get_by_window(%{account_id: account_id, window_start: window_start, window_end: window_end, include_settled: false}) do
     query = from(event in __MODULE__,
       where: event.account_id == ^account_id,
       where: event.anticipated_date >= ^window_start,
       where: event.anticipated_date <= ^window_end,
       where: is_nil(event.settled),
+      order_by: [asc: event.anticipated_date]
+    )
+    Plutus.Repo.all(query)
+  end
+
+  def get_by_window(%{account_id: account_id, window_start: window_start, window_end: window_end}) do
+    query = from(event in __MODULE__,
+      where: event.account_id == ^account_id,
+      where: event.anticipated_date >= ^window_start,
+      where: event.anticipated_date <= ^window_end,
       order_by: [asc: event.anticipated_date]
     )
     Plutus.Repo.all(query)

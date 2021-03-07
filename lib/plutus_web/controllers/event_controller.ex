@@ -12,7 +12,8 @@ defmodule PlutusWeb.EventController do
     get_window_params(%{
       account_id!: AccountId,
       window_start!: StringDate,
-      window_end!: StringDate
+      window_end!: StringDate,
+      include_settled: :boolean
     })
   )
 
