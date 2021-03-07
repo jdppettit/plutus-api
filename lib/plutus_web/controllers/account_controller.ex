@@ -5,6 +5,7 @@ defmodule PlutusWeb.AccountController do
   alias Plutus.Model.Account
   alias Plutus.Common.Balance
   alias Plutus.Worker.{AccountWorker,TransactionWorker}
+  alias PlutusWeb.Params.{AccountId,AccountType} 
 
   require Logger
 
@@ -30,7 +31,10 @@ defmodule PlutusWeb.AccountController do
       public_token!: :string,
       account_name: :string,
       last_four: :integer,
-      remote_id: :string
+      remote_id: :string,
+      type: AccountType,
+      balance_to_maintain: :float,
+      include_in_overall: :boolean
     })
   )
 
@@ -114,6 +118,36 @@ defmodule PlutusWeb.AccountController do
         |> put_status(500)
         |> render("bad_request.json", message: "database error")      
     end 
+  end
+
+  defparams(
+    update_params(%{
+      id: AccountId,
+      description: :string,
+      account_name: :string,
+      last_four: :integer,
+      type: AccountType,
+      balance_to_maintain: :float,
+      include_in_overall: :boolean
+    })
+  )
+
+  def update(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, update_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, model} <- Account.update_account(parsed_params) do
+      conn
+      |> render("account_updated.json", account: model)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
+    end
   end
 
   def get_all(conn, _params) do

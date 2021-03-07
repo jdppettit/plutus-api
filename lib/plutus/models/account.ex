@@ -17,6 +17,9 @@ defmodule Plutus.Model.Account do
     field :access_token, :string
     field :last_refreshed, :date
     field :account_name, :string
+    field :balance_to_maintain, :float, default: 0.00
+    field :type, AccountType
+    field :include_in_overall, :boolean, default: true
 
     timestamps()
 
@@ -94,5 +97,11 @@ defmodule Plutus.Model.Account do
 
   def get_all_accounts() do
     Plutus.Repo.all(__MODULE__)
+  end
+
+  def update_account(map) do
+    {:ok, model} = get_by_id(map.id)
+    {:ok, changeset} = create_changeset(model, map)
+    Repo.update(changeset)
   end
 end
