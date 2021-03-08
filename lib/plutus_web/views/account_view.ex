@@ -23,7 +23,27 @@ defmodule PlutusWeb.AccountView do
         remote_id: account.remote_id,
         balance: account.balance,
         last_refreshed: account.last_refreshed,
-        account_name: account.account_name
+        account_name: account.account_name,
+        balance_to_maintain: account.balance_to_maintain,
+        type: account.type,
+        include_in_overall: account.include_in_overall
+      }
+    }
+  end
+
+  def render("account_updated.json", %{account: account}) do
+    %{
+      message: "account updated",
+      account: %{
+        id: account.id,
+        description: account.description,
+        remote_id: account.remote_id,
+        balance: account.balance,
+        last_refreshed: account.last_refreshed,
+        account_name: account.account_name,
+        balance_to_maintain: account.balance_to_maintain,
+        type: account.type,
+        include_in_overall: account.include_in_overall
       }
     }
   end
@@ -52,7 +72,10 @@ defmodule PlutusWeb.AccountView do
         computed_balance: account.computed_balance,
         computed_expenses: account.computed_expenses,
         last_refreshed: account.last_refreshed,
-        account_name: account.account_name
+        account_name: account.account_name,
+        balance_to_maintain: account.balance_to_maintain,
+        type: account.type,
+        include_in_overall: account.include_in_overall
       }
     }
   end
@@ -68,7 +91,10 @@ defmodule PlutusWeb.AccountView do
         computed_balance: account.computed_balance,
         computed_expenses: account.computed_expenses,
         last_refreshed: account.last_refreshed,
-        account_name: account.account_name
+        account_name: account.account_name,
+        balance_to_maintain: account.balance_to_maintain,
+        type: account.type,
+        include_in_overall: account.include_in_overall
       }
     end)
 
