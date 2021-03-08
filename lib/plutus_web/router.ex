@@ -11,6 +11,7 @@ defmodule PlutusWeb.Router do
    
     get "/account/linktoken", AccountController, :link_token
     post "/account", AccountController, :create
+    put "/account", AccountController, :update
     post "/account/exchange", AccountController, :exchange
     get "/account/:id", AccountController, :get
     get "/account", AccountController, :get_all
