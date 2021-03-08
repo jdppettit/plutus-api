@@ -122,10 +122,8 @@ defmodule PlutusWeb.AccountController do
 
   defparams(
     update_params(%{
-      id: AccountId,
+      id!: AccountId,
       description: :string,
-      account_name: :string,
-      last_four: :integer,
       type: AccountType,
       balance_to_maintain: :float,
       include_in_overall: :boolean

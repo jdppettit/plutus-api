@@ -4,7 +4,7 @@ defmodule PlutusWeb.Params.AccountType do
   def type, do: :string
 
   def cast(type) when is_binary(type) do
-    case Enum.member?(AccountType.__valid_values_(), type) do
+    case Enum.member?(AccountType.__valid_values__(), type) do
       true ->
         {:ok, type}
       false ->

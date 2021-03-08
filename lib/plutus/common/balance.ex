@@ -21,6 +21,7 @@ defmodule Plutus.Common.Balance do
 
   def add_computed_values(model) do
     {updated_balance, expenses} = compute_balance(model)
+    |> potentially_subtract_balance_to_maintain(model)
     updated_model = model
     |> Map.put(:computed_balance, updated_balance)
     |> Map.put(:computed_expenses, expenses |> parse_expenses)
@@ -40,5 +41,14 @@ defmodule Plutus.Common.Balance do
         parent_id: event.parent_id
       }
     end)
+  end
+
+  def potentially_subtract_balance_to_maintain({computed_balance, expenses}, account) do
+    case is_nil(Map.get(account, :balance_to_maintain, nil)) do
+      true ->
+        {computed_balance, expenses}
+      false ->
+        {computed_balance - account.balance_to_maintain, expenses}
+    end
   end
 end
