@@ -22,6 +22,7 @@ defmodule Plutus.Model.Event do
     field :account_id, :integer
     field :settled_by, :integer
     field :transaction_description, :string
+    field :auto_settle, :boolean, default: true
 
     timestamps()
   end
@@ -32,9 +33,7 @@ defmodule Plutus.Model.Event do
     |> validate_required([
       :amount,
       :description,
-      :target_id,
       :type,
-      :precompute_date
     ])
   end
 
@@ -58,6 +57,11 @@ defmodule Plutus.Model.Event do
         Logger.error("#{__MODULE__}: Changeset invalid #{inspect(changeset)}")
         {:error, :changeset_invalid}
     end
+  end
+
+  def create(map) do
+    {:ok, changeset} = __MODULE__.create_changeset(map)
+    __MODULE__.insert(changeset)
   end
 
   def get_by_id(id) do
@@ -191,6 +195,7 @@ defmodule Plutus.Model.Event do
   def get_current_income_event(account_id) do
     current_date = PDate.get_current_date()
     beginning_of_month = PDate.get_beginning_of_month()
+    end_of_month = PDate.get_end_of_month()
     query = from(event in __MODULE__,
       where: event.account_id == ^account_id,
       where: event.anticipated_date <= ^current_date,
@@ -237,5 +242,15 @@ defmodule Plutus.Model.Event do
     )
     Repo.delete_all(query) 
     {:ok, nil}
+  end
+
+  def delete_by_id(id) do
+    {:ok, model} = get_by_id(id)
+    case Repo.delete(model) do
+      {:ok, _struct} ->
+        {:ok, nil}
+      {:error, _} ->
+        {:error, :database_error}
+    end
   end
 end

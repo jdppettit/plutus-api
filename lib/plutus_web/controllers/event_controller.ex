@@ -4,9 +4,42 @@ defmodule PlutusWeb.EventController do
 
   alias Plutus.Model.{Event,Account}
   alias Plutus.Worker.{PrecomputeWorker,SettlementWorker,MatchWorker,AccountWorker,TransactionWorker}
-  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate, EventId}
+  alias PlutusWeb.Params.{AccountId, ExpenseId, IncomeId, StringDate, EventId, EventType}
 
   require Logger
+
+  defparams(
+    create_params(%{
+      account_id!: AccountId,
+      parent_id!: EventId,
+      amount!: :float,
+      description!: :string,
+      transaction_description: :string,
+      type: EventType,
+      auto_settle: :boolean,
+      anticipated_date!: StringDate
+    })
+  )
+
+  def create(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, create_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, model} <- Event.create(parsed_params)
+    do
+      conn
+      |> render("event_created.json", event: model)
+    else
+      {:validation, changeset} ->
+        IO.inspect(changeset, label: "changeset")
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")      
+    end
+  end
 
   defparams(
     get_window_params(%{
@@ -111,6 +144,32 @@ defmodule PlutusWeb.EventController do
          {:ok, model} <- Event.update_event(parsed_params) do
       conn
       |> render("event_updated.json", event: model)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
+    end
+  end
+
+  defparams(
+    delete_params(%{
+      account_id!: AccountId,
+      id!: EventId
+    })
+  )
+
+  def delete(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, delete_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, _} <- Event.delete_by_id(parsed_params.id),
+         :ok <- PrecomputeWorker.adhoc_precompute do
+      conn
+      |> render("event_deleted.json", id: parsed_params.id)
     else
       {:validation, _} ->
         conn

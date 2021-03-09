@@ -31,7 +31,9 @@ defmodule PlutusWeb.Router do
 
     get "/account/:account_id/event/income/current", EventController, :get_current_income
     get "/account/:account_id/event", EventController, :get_by_window
+    post "/account/:account_id/event", EventController, :create
     put "/account/:account_id/event/:id", EventController, :update
+    delete "/account/:account_id/event/:id", EventController, :delete
 
     get "/update_balances", AccountController, :update_balances
     get "/precompute", EventController, :precompute
