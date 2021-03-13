@@ -45,7 +45,7 @@ defmodule Plutus.Worker.TransactionWorker do
   end
 
   def fetch_transactions(account, count, offset) do
-    {:ok, tx_data} = Plaid.Transactions.get(%{
+    case Plaid.Transactions.get(%{
       access_token: account.access_token,
       start_date: one_month_ago(),
       end_date: now(),
@@ -53,17 +53,20 @@ defmodule Plutus.Worker.TransactionWorker do
         count: count,
         offset: offset
       }
-    })
+    }) do
+      {:ok, tx_data} ->
+        tx_data.transactions
+        |> filter_for_account(account.remote_id)
+        |> persist_transactions(account.id)
+        
+        new_offset = offset+100
 
-    tx_data.transactions
-    |> filter_for_account(account.remote_id)
-    |> persist_transactions(account.id)
-    
-    new_offset = offset+100
-
-    if tx_data.total_transactions >= count do
-      :timer.sleep(@fetch_interval)
-      fetch_transactions(account, count, offset + 100)
+        if tx_data.total_transactions >= count do
+          :timer.sleep(@fetch_interval)
+          fetch_transactions(account, count, offset + 100)
+        end
+      {:error, error} ->
+        Logger.error("#{__MODULE__}: Got error #{inspect(error)} when fetching transactions for account #{account.id} / #{account.description}")
     end
   end
 
