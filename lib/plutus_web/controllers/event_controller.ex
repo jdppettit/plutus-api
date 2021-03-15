@@ -30,7 +30,6 @@ defmodule PlutusWeb.EventController do
       |> render("event_created.json", event: model)
     else
       {:validation, changeset} ->
-        IO.inspect(changeset, label: "changeset")
         conn
         |> put_status(400)
         |> render("bad_request.json", message: "bad request")

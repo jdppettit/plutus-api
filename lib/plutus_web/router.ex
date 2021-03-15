@@ -20,6 +20,8 @@ defmodule PlutusWeb.Router do
     get "/account/:account_id/transaction/window", TransactionController, :get_by_window
     get "/account/:account_id/transaction/:id", TransactionController, :get
 
+    post "/account/:account_id/once_off", OnceOffController, :create
+
     post "/account/:account_id/income", IncomeController, :create
     get "/account/:account_id/income", IncomeController, :get_all
     get "/account/:account_id/income/:id", IncomeController, :get
