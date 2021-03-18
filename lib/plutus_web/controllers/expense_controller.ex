@@ -41,6 +41,38 @@ defmodule PlutusWeb.ExpenseController do
   end
 
   defparams(
+    update_params(%{
+      account_id!: AccountId,
+      income_id!: IncomeId,
+      id!: ExpenseId,
+      amount: :float,
+      description!: :string,
+      transaction_description: :string,
+      month: IntegerMonth,
+      recurring!: :boolean
+    })
+  )
+
+  def update(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, update_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, model} <- Expense.update_expense(parsed_params),
+         :ok <- PrecomputeWorker.adhoc_precompute do
+      conn
+      |> render("expense_updated.json", expense: model)
+    else
+      {:validation, _} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")
+    end
+  end
+
+  defparams(
     get_all_params(%{
       account_id!: AccountId,
       income_id!: IncomeId,
@@ -74,7 +106,7 @@ defmodule PlutusWeb.ExpenseController do
   )
 
   def get(conn, raw_params) do
-    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_all_params(raw_params)},
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_params(raw_params)},
          parsed_params <- Params.to_map(params_changeset),
          {:ok, expense} <- Expense.get_by_id(parsed_params.id) do
       conn

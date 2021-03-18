@@ -36,4 +36,29 @@ defmodule PlutusWeb.OnceOffController do
         |> render("bad_request.json", message: "database error")  
     end
   end
+
+  defparams(
+    get_all_params(%{
+      account_id!: AccountId,
+    })
+  )
+
+  def get_all(conn, raw_params) do
+    with {:validation, %{valid?: true} = params_changeset} <- {:validation, get_all_params(raw_params)},
+         parsed_params <- Params.to_map(params_changeset),
+         {:ok, models} <- OnceOff.get_all_once_off_for_account(parsed_params) 
+    do
+      conn
+      |> render("once_offs.json", once_offs: models)
+    else
+      {:validation, changeset} ->
+        conn
+        |> put_status(400)
+        |> render("bad_request.json", message: "bad request")
+      {:error, :database_error} ->
+        conn
+        |> put_status(500)
+        |> render("bad_request.json", message: "database error")  
+    end
+  end 
 end

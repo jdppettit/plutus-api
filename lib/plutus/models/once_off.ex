@@ -73,11 +73,23 @@ defmodule Plutus.Model.OnceOff do
   def insert(changeset) do
     case Repo.insert(changeset) do
       {:ok, model} ->
-        {:ok, model}
+        {:ok, model |> wrap_in_type}
 
       _ ->
         Logger.error("#{__MODULE__}: Problem inserting record #{inspect(changeset)}")
         {:error, :database_error}
+    end
+  end
+
+  def get_all_once_off_for_account(%{account_id: account_id} = map) do
+    query = from once_off in __MODULE__,
+      where: once_off.account_id == ^account_id
+    case Plutus.Repo.all(query) do
+      once_off ->
+        {:ok, once_off |> wrap_in_type}
+      {:error, error} ->
+        Logger.error("#{__MODULE__} Error querying entry record #{inspect(error)}")
+        {:error, :not_found}
     end
   end
 

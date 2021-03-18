@@ -72,6 +72,12 @@ defmodule Plutus.Model.Expense do
     end
   end
 
+  def update_expense(map) do
+    {:ok, model} = get_by_id(map.id)
+    {:ok, changeset} = create_changeset(model, map)
+    Repo.update(changeset)
+  end
+
   def update(changeset) do
     case Repo.update(changeset) do
       {:ok, model} ->

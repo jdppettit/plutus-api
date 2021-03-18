@@ -155,7 +155,7 @@ defmodule Plutus.Model.Event do
       where: event.anticipated_date >= ^window_start,
       where: event.anticipated_date <= ^window_end,
       where: event.type == ^type,
-      where: is_nil(event.settled),
+      where: is_nil(event.settled) or event.settled == ^false,
       order_by: [asc: event.anticipated_date]
     )
     Plutus.Repo.all(query)
@@ -176,7 +176,7 @@ defmodule Plutus.Model.Event do
       where: event.account_id == ^account_id,
       where: event.anticipated_date >= ^window_start,
       where: event.anticipated_date <= ^window_end,
-      where: is_nil(event.settled),
+      where: is_nil(event.settled) or event.settled == ^false,
       order_by: [asc: event.anticipated_date]
     )
     Plutus.Repo.all(query)
@@ -200,7 +200,7 @@ defmodule Plutus.Model.Event do
       where: event.account_id == ^account_id,
       where: event.anticipated_date <= ^current_date,
       where: event.type == ^"income",
-      where: is_nil(event.settled)
+      where: is_nil(event.settled) or event.settled == ^false
     )
     {:ok, Plutus.Repo.one(query)}
   end
@@ -213,7 +213,7 @@ defmodule Plutus.Model.Event do
       where: event.anticipated_date >= ^one_month_ago,
       where: event.anticipated_date <= ^current_date,
       where: event.type == ^"income",
-      where: is_nil(event.settled),
+      where: is_nil(event.settled) or event.settled == ^false,
       order_by: [desc: event.anticipated_date]
     )
     Plutus.Repo.all(query)
@@ -225,7 +225,7 @@ defmodule Plutus.Model.Event do
     query = from(event in __MODULE__,
       where: event.parent_id == ^parent_id,
       where: event.type == ^"expense",
-      where: is_nil(event.settled)
+      where: is_nil(event.settled) or event.settled == ^false
     )
     {:ok, Plutus.Repo.all(query)}
   end

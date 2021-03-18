@@ -11,7 +11,9 @@ defmodule PlutusWeb.EventView do
         type: event.type,
         settled: event.settled,
         anticipated_date: event.anticipated_date,
-        parent_id: event.parent_id
+        parent_id: event.parent_id,
+        settled_by: event.settled_by,
+        target_id: event.target_id
       }
     }
   end
@@ -65,7 +67,9 @@ defmodule PlutusWeb.EventView do
         type: event.type,
         settled: event.settled,
         anticipated_date: event.anticipated_date,
-        parent_id: event.parent_id
+        parent_id: event.parent_id,
+        settled_by: event.settled_by,
+        target_id: event.target_id
       }
     end)
     %{
@@ -84,7 +88,9 @@ defmodule PlutusWeb.EventView do
         type: event.type,
         settled: event.settled,
         anticipated_date: event.anticipated_date,
-        parent_id: event.parent_id
+        parent_id: event.parent_id,
+        settled_by: event.settled_by,
+        target_id: event.target_id
       }
     }
   end

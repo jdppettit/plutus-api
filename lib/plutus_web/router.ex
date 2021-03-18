@@ -21,6 +21,7 @@ defmodule PlutusWeb.Router do
     get "/account/:account_id/transaction/:id", TransactionController, :get
 
     post "/account/:account_id/once_off", OnceOffController, :create
+    get "/account/:account_id/once_off", OnceOffController, :get_all
 
     post "/account/:account_id/income", IncomeController, :create
     get "/account/:account_id/income", IncomeController, :get_all
@@ -30,6 +31,7 @@ defmodule PlutusWeb.Router do
     post "/account/:account_id/income/:income_id/expense", ExpenseController, :create
     get "/account/:account_id/income/:income_id/expense", ExpenseController, :get_all
     get "/account/:account_id/income/:income_id/expense/:id", ExpenseController, :get
+    put "/account/:account_id/income/:income_id/expense/:id", ExpenseController, :update
 
     get "/account/:account_id/event/income/current", EventController, :get_current_income
     get "/account/:account_id/event", EventController, :get_by_window

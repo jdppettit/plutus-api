@@ -103,7 +103,7 @@ defmodule Plutus.Worker.PrecomputeWorker do
             anticipated_date: anticipated_date,
             parent_id: parent_id,
             account_id: account_id,
-            transaction_description: expense.transaction_description
+            transaction_description: expense.transaction_description,
           })
         else
           Logger.info("#{__MODULE__}: Expense #{inspect(expense.id)} is not recurring, examining further")
